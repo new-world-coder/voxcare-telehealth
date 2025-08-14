@@ -1,0 +1,397 @@
+name: PulseCare CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+env:
+  REGISTRY: gcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Build and Test Backend
+  build-backend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java-version: [21]
+        maven-version: [3.9.5]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ matrix.java-version }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: 'temurin'
+        cache: 'maven'
+        
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Build with Maven
+      working-directory: ./backend
+      run: |
+        ./mvnw clean verify -DskipTests
+        
+    - name: Run Backend Tests
+      working-directory: ./backend
+      run: |
+        ./mvnw test
+        
+    - name: Run Integration Tests
+      working-directory: ./backend
+      run: |
+        ./mvnw verify -DskipUnitTests
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: backend-test-results
+        path: backend/target/surefire-reports/
+        
+  # Build and Test Frontend
+  build-frontend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install dependencies (Staff Portal)
+      working-directory: ./frontend/staff-portal-react
+      run: npm ci
+      
+    - name: Install dependencies (Patient Portal)
+      working-directory: ./frontend/patient-portal-vue
+      run: npm ci
+      
+    - name: Run tests (Staff Portal)
+      working-directory: ./frontend/staff-portal-react
+      run: npm test -- --watchAll=false
+      
+    - name: Run tests (Patient Portal)
+      working-directory: ./frontend/patient-portal-vue
+      run: npm test -- --watchAll=false
+      
+    - name: Build (Staff Portal)
+      working-directory: ./frontend/staff-portal-react
+      run: npm run build
+      
+    - name: Build (Patient Portal)
+      working-directory: ./frontend/patient-portal-vue
+      run: npm run build
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-builds
+        path: |
+          frontend/staff-portal-react/dist/
+          frontend/patient-portal-vue/dist/
+          
+  # Run E2E Tests
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        
+    - name: Install Playwright
+      run: npx playwright install --with-deps
+      
+    - name: Start services
+      run: |
+        docker-compose up -d postgres mongo
+        sleep 30
+        
+    - name: Run E2E tests (Staff Portal)
+      working-directory: ./frontend/staff-portal-react
+      run: npm run test:e2e
+      
+    - name: Run E2E tests (Patient Portal)
+      working-directory: ./frontend/patient-portal-vue
+      run: npm run test:e2e
+      
+    - name: Upload Playwright report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: playwright-report
+        path: |
+          frontend/staff-portal-react/playwright-report/
+          frontend/patient-portal-vue/playwright-report/
+          
+  # Build and Push Docker Images
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    if: github.event_name == 'release'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Log in to Google Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: _json_key
+        password: ${{ secrets.GCP_SA_KEY }}
+        
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha,prefix={{branch}}-
+          
+    - name: Build and push Discovery Service
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend/discovery-service
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/discovery-service:${{ steps.meta.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push Config Service
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend/config-service
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/config-service:${{ steps.meta.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push Auth Service
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend/auth-service
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/auth-service:${{ steps.meta.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push Patient Service
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend/patient-service
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/patient-service:${{ steps.meta.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push Provider Service
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend/provider-service
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/provider-service:${{ steps.meta.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push Appointment Service
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend/appointment-service
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/appointment-service:${{ steps.meta.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push Telehealth Service
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend/telehealth-service
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/telehealth-service:${{ steps.meta.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push Notification Service
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend/notification-service
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/notification-service:${{ steps.meta.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push API Gateway
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend/api-gateway
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/api-gateway:${{ steps.meta.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push Staff Portal
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend/staff-portal-react
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/staff-portal:${{ steps.meta.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push Patient Portal
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend/patient-portal-vue
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/patient-portal:${{ steps.meta.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+  # Deploy to GKE
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    if: github.event_name == 'release'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Google Cloud CLI
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        
+    - name: Configure Docker for GCR
+      run: gcloud auth configure-docker
+      
+    - name: Get GKE credentials
+      run: |
+        gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} \
+          --zone ${{ secrets.GKE_ZONE }} \
+          --project ${{ secrets.GCP_PROJECT_ID }}
+          
+    - name: Deploy to GKE
+      run: |
+        # Update image tags in Kubernetes manifests
+        find k8s -name "*.yaml" -exec sed -i "s|gcr.io/.*:|${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/|g" {} \;
+        find k8s -name "*.yaml" -exec sed -i "s|:latest|:${{ github.event.release.tag_name }}|g" {} \;
+        
+        # Apply manifests
+        kubectl apply -f k8s/namespace.yaml
+        kubectl apply -f k8s/postgres/
+        kubectl apply -f k8s/mongo/
+        kubectl apply -f k8s/discovery-service/
+        kubectl apply -f k8s/config-service/
+        kubectl apply -f k8s/auth-service/
+        kubectl apply -f k8s/patient-service/
+        kubectl apply -f k8s/provider-service/
+        kubectl apply -f k8s/appointment-service/
+        kubectl apply -f k8s/telehealth-service/
+        kubectl apply -f k8s/notification-service/
+        kubectl apply -f k8s/api-gateway/
+        kubectl apply -f k8s/staff-portal/
+        kubectl apply -f k8s/patient-portal/
+        kubectl apply -f k8s/ingress.yaml
+        kubectl apply -f k8s/hpa-appointment.yaml
+        
+        # Wait for deployment
+        kubectl rollout status deployment/api-gateway -n pulsecare --timeout=300s
+        
+    - name: Get deployment status
+      run: |
+        kubectl get pods -n pulsecare
+        kubectl get services -n pulsecare
+        kubectl get ingress -n pulsecare
+        
+    - name: Get public URL
+      run: |
+        echo "Public URL: $(kubectl get ingress -n pulsecare -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}')"
+        
+  # Security and Quality Checks
+  security:
+    runs-on: ubuntu-latest
+    needs: [build-backend]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: 21
+        distribution: 'temurin'
+        
+    - name: Run SpotBugs
+      working-directory: ./backend
+      run: |
+        ./mvnw spotbugs:check
+        
+    - name: Run Checkstyle
+      working-directory: ./backend
+      run: |
+        ./mvnw checkstyle:check
+        
+    - name: Run Spotless
+      working-directory: ./backend
+      run: |
+        ./mvnw spotless:check
+        
+    - name: Run Dependency Check
+      working-directory: ./backend
+      run: |
+        ./mvnw org.owasp:dependency-check-maven:check
+        
+  # Notify on completion
+  notify:
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: always()
+    
+    steps:
+    - name: Notify deployment status
+      run: |
+        if [ "${{ needs.deploy.result }}" == "success" ]; then
+          echo "✅ Deployment successful!"
+          echo "🚀 PulseCare is now running on GKE"
+          echo "🌐 Public URL: ${{ needs.deploy.outputs.url }}"
+        else
+          echo "❌ Deployment failed!"
+          echo "🔍 Check the logs for details"
+        fi
