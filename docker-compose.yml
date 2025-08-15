@@ -1,0 +1,424 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: pulsecare-postgres
+    environment:
+      POSTGRES_DB: pulsecare
+      POSTGRES_USER: pulsecare
+      POSTGRES_PASSWORD: pulsecare123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pulsecare"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pulsecare-network
+
+  # MongoDB Database
+  mongo:
+    image: mongo:7.0
+    container_name: pulsecare-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: pulsecare
+      MONGO_INITDB_ROOT_PASSWORD: pulsecare123
+      MONGO_INITDB_DATABASE: pulsecare
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pulsecare-network
+
+  # Kafka (Optional - for domain events)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: pulsecare-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pulsecare-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: pulsecare-kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - pulsecare-network
+
+  # Eureka Service Discovery
+  discovery-service:
+    build:
+      context: ./backend/discovery-service
+      dockerfile: Dockerfile
+    container_name: pulsecare-discovery
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: discovery-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - pulsecare-network
+
+  # Config Service
+  config-service:
+    build:
+      context: ./backend/config-service
+      dockerfile: Dockerfile
+    container_name: pulsecare-config
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: config-service
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - pulsecare-network
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./backend/auth-service
+      dockerfile: Dockerfile
+    container_name: pulsecare-auth
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: auth-service
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pulsecare
+      SPRING_DATASOURCE_USERNAME: pulsecare
+      SPRING_DATASOURCE_PASSWORD: pulsecare123
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - pulsecare-network
+
+  # Patient Service
+  patient-service:
+    build:
+      context: ./backend/patient-service
+      dockerfile: Dockerfile
+    container_name: pulsecare-patient
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: patient-service
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pulsecare
+      SPRING_DATASOURCE_USERNAME: pulsecare
+      SPRING_DATASOURCE_PASSWORD: pulsecare123
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - pulsecare-network
+
+  # Provider Service
+  provider-service:
+    build:
+      context: ./backend/provider-service
+      dockerfile: Dockerfile
+    container_name: pulsecare-provider
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: provider-service
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pulsecare
+      SPRING_DATASOURCE_USERNAME: pulsecare
+      SPRING_DATASOURCE_PASSWORD: pulsecare123
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - pulsecare-network
+
+  # Appointment Service
+  appointment-service:
+    build:
+      context: ./backend/appointment-service
+      dockerfile: Dockerfile
+    container_name: pulsecare-appointment
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: appointment-service
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pulsecare
+      SPRING_DATASOURCE_USERNAME: pulsecare
+      SPRING_DATASOURCE_PASSWORD: pulsecare123
+      KAFKA_ENABLED: false
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - pulsecare-network
+
+  # Telehealth Service
+  telehealth-service:
+    build:
+      context: ./backend/telehealth-service
+      dockerfile: Dockerfile
+    container_name: pulsecare-telehealth
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: telehealth-service
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      SPRING_DATA_MONGODB_URI: mongodb://pulsecare:pulsecare123@mongo:27017/pulsecare?authSource=admin
+      JITSI_BASE_URL: https://meet.jit.si
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - pulsecare-network
+
+  # Notification Service
+  notification-service:
+    build:
+      context: ./backend/notification-service
+      dockerfile: Dockerfile
+    container_name: pulsecare-notification
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: notification-service
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      SPRING_DATA_MONGODB_URI: mongodb://pulsecare:pulsecare123@mongo:27017/pulsecare?authSource=admin
+      SENDGRID_API_KEY: your-sendgrid-api-key
+      SENDGRID_ENABLED: false
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - pulsecare-network
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: pulsecare-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: api-gateway
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - pulsecare-network
+
+  # Staff Portal (React)
+  staff-portal:
+    build:
+      context: ./frontend/staff-portal-react
+      dockerfile: Dockerfile
+    container_name: pulsecare-staff-portal
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_BASE_URL: http://localhost:8080
+      REACT_APP_AUTH_SERVICE_URL: http://localhost:8081
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - pulsecare-network
+
+  # Patient Portal (Vue)
+  patient-portal:
+    build:
+      context: ./frontend/patient-portal-vue
+      dockerfile: Dockerfile
+    container_name: pulsecare-patient-portal
+    ports:
+      - "3001:3000"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080
+      VITE_AUTH_SERVICE_URL: http://localhost:8081
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - pulsecare-network
+
+  # Prometheus (Optional - for metrics)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: pulsecare-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - pulsecare-network
+
+  # Grafana (Optional - for dashboards)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: pulsecare-grafana
+    ports:
+      - "3002:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      prometheus:
+        condition: service_started
+    networks:
+      - pulsecare-network
+
+volumes:
+  postgres_data:
+  mongo_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  pulsecare-network:
+    driver: bridge
