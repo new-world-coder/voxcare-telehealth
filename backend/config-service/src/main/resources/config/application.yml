@@ -1,10 +1,6 @@
 spring:
   application:
-    name: auth-service
-  main:
-    allow-circular-references: true
-  profiles:
-    active: local
+    name: default-config
   datasource:
     url: jdbc:postgresql://postgres:5432/pulsecare
     username: pulsecare
@@ -17,22 +13,16 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-
-server:
-  port: 8081
+  data:
+    mongodb:
+      uri: mongodb://pulsecare:pulsecare123@mongo:27017/pulsecare?authSource=admin
 
 eureka:
   client:
     service-url:
       defaultZone: http://discovery-service:8761/eureka/
   instance:
-    hostname: auth-service
-
-jwt:
-  secret: your-super-secret-jwt-key-change-in-production
-  expiration: 3600000  # 1 hour
-  refresh-expiration: 86400000  # 24 hours
+    hostname: ${spring.application.name}
 
 management:
   endpoints:
@@ -45,5 +35,5 @@ management:
 
 logging:
   level:
-    com.pulsecare.auth: DEBUG
-    org.springframework.security: DEBUG
+    com.pulsecare: DEBUG
+    org.springframework.cloud: INFO
