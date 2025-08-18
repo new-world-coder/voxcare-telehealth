@@ -3,6 +3,7 @@ package com.pulsecare.auth.config;
 import com.pulsecare.auth.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -32,7 +33,8 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, UserDetailsService userDetailsService) {
+    public SecurityConfig(@Lazy JwtAuthenticationFilter jwtAuthFilter, 
+                         @Lazy UserDetailsService userDetailsService) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
     }

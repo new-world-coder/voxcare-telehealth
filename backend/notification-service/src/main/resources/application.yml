@@ -1,0 +1,54 @@
+server:
+  port: ${SERVER_PORT:8086}
+
+spring:
+  application:
+    name: notification-service
+  
+  data:
+    mongodb:
+      uri: mongodb://mongodb:27017/pulsecare_notifications
+      database: pulsecare_notifications
+  
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:notifications@pulsecare.com}
+    password: ${MAIL_PASSWORD:password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    test-connection: false
+
+  cloud:
+    discovery:
+      enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    health-check-url-path: /actuator/health
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.pulsecare.notification: DEBUG
+    org.springframework.mail: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

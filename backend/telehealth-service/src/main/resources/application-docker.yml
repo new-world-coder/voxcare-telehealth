@@ -1,0 +1,33 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://pulsecare:pulsecare123@mongo:27017/pulsecare?authSource=admin
+  server:
+    port: 8085
+  application:
+    name: telehealth-service
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka/
+  instance:
+    hostname: telehealth-service
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+jitsi:
+  base-url: https://meet.jit.si
+
+logging:
+  level:
+    com.pulsecare.telehealth: DEBUG
+    org.springframework.web: INFO
