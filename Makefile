@@ -1,4 +1,4 @@
-.PHONY: help init build test clean up down swagger seed load-test
+.PHONY: help init build test clean up down swagger seed load-test security
 
 # Default target
 help:
@@ -24,6 +24,9 @@ help:
 	@echo "  swagger     - Export OpenAPI specifications"
 	@echo "  clean       - Clean build artifacts"
 	@echo "  load-test   - Run load testing to trigger HPA scaling"
+	@echo ""
+	@echo "Security:"
+	@echo "  security    - Run comprehensive security analysis and compliance checks"
 	@echo ""
 
 # Initialize project
@@ -196,3 +199,12 @@ status:
 	@echo ""
 	@echo "🗄️  Database Status:"
 	@make db-status
+
+# Security analysis and compliance checks
+security:
+	@echo "🔒 Running comprehensive security analysis..."
+	@echo "This will check for HIPAA, PCI, HL7, GDPR, and OWASP compliance issues."
+	@echo ""
+	@./scripts/security-lint.sh
+	@echo ""
+	@echo "📊 Security analysis complete! Check the security-reports/ directory for detailed results."

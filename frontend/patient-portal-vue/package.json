@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "lint:check": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path .gitignore"
   },
   "dependencies": {
     "vue": "^3.3.4",
@@ -20,6 +22,11 @@
     "@vitejs/plugin-vue": "^4.2.3",
     "vite": "^4.4.5",
     "vitest": "^0.34.1",
-    "@playwright/test": "^1.36.0"
+    "@playwright/test": "^1.36.0",
+    "eslint": "^8.45.0",
+    "eslint-plugin-vue": "^9.15.1",
+    "eslint-plugin-security": "^1.7.1",
+    "eslint-plugin-vuejs-accessibility": "^2.0.0",
+    "@vue/eslint-config-prettier": "^8.0.0"
   }
 }

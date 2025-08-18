@@ -1,0 +1,46 @@
+rules:
+  # HIPAA Compliance Rules
+  - id: hipaa-phi-logging
+    pattern: |
+      console\.log($X)
+    message: "CRITICAL: Potential PHI logging - HIPAA violation"
+    severity: ERROR
+    languages: [javascript, typescript, vue]
+    
+  - id: hipaa-http-usage
+    pattern: |
+      "http://"
+    message: "CRITICAL: Unencrypted HTTP usage - HIPAA violation"
+    severity: ERROR
+    languages: [javascript, typescript, vue, java]
+    
+  # PCI DSS Compliance Rules
+  - id: pci-credit-card-pattern
+    pattern: |
+      \b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b
+    message: "CRITICAL: Credit card pattern detected - PCI violation"
+    severity: ERROR
+    languages: [javascript, typescript, vue, java]
+    
+  # OWASP Top 10 Rules
+  - id: owasp-sql-injection
+    pattern: |
+      executeQuery($X)
+    message: "CRITICAL: Potential SQL injection - OWASP Top 10"
+    severity: ERROR
+    languages: [java]
+    
+  - id: owasp-xss-innerhtml
+    pattern: |
+      innerHTML = $X
+    message: "CRITICAL: XSS vulnerability via innerHTML - OWASP Top 10"
+    severity: ERROR
+    languages: [javascript, typescript]
+    
+  # GDPR Compliance Rules
+  - id: gdpr-consent-check
+    pattern: |
+      consent.*management
+    message: "HIGH: Ensure proper consent management for GDPR compliance"
+    severity: WARNING
+    languages: [javascript, typescript, vue, java]

@@ -1,0 +1,222 @@
+# PulseCare Security Configuration
+# HIPAA, PCI, HL7, GDPR, and OWASP Compliance Rules
+
+security:
+  # HIPAA Compliance Rules
+  hipaa:
+    phi_protection:
+      - rule: "no_phi_in_logs"
+        description: "Protected Health Information must not be logged"
+        severity: "CRITICAL"
+        patterns:
+          - "\\b(ssn|social|security|number)\\b"
+          - "\\b(patient|medical|health|record)\\b"
+          - "\\b(diagnosis|treatment|medication)\\b"
+      
+      - rule: "encrypt_phi_transmission"
+        description: "All PHI transmission must be encrypted"
+        severity: "CRITICAL"
+        patterns:
+          - "http://"
+          - "ftp://"
+          - "unencrypted"
+    
+    access_control:
+      - rule: "audit_logging"
+        description: "All PHI access must be logged"
+        severity: "HIGH"
+        patterns:
+          - "audit"
+          - "logging"
+          - "access"
+    
+    data_retention:
+      - rule: "phi_retention_policy"
+        description: "PHI must have defined retention policies"
+        severity: "HIGH"
+        patterns:
+          - "retention"
+          - "policy"
+          - "disposal"
+
+  # PCI DSS Compliance Rules
+  pci:
+    card_data_protection:
+      - rule: "no_pan_storage"
+        description: "Primary Account Numbers must not be stored in plain text"
+        severity: "CRITICAL"
+        patterns:
+          - "\\b\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}\\b"
+          - "credit.*card"
+          - "card.*number"
+      
+      - rule: "encrypt_card_data"
+        description: "Card data must be encrypted at rest and in transit"
+        severity: "CRITICAL"
+        patterns:
+          - "encrypt"
+          - "cipher"
+          - "ssl"
+          - "tls"
+
+  # HL7 FHIR Compliance Rules
+  hl7:
+    fhir_standards:
+      - rule: "fhir_resource_validation"
+        description: "FHIR resources must be validated against schemas"
+        severity: "HIGH"
+        patterns:
+          - "fhir"
+          - "hl7"
+          - "resource"
+      
+      - rule: "fhir_security_labels"
+        description: "FHIR resources must have appropriate security labels"
+        severity: "HIGH"
+        patterns:
+          - "security.*label"
+          - "confidentiality"
+
+  # GDPR Compliance Rules
+  gdpr:
+    data_protection:
+      - rule: "consent_management"
+        description: "User consent must be properly managed"
+        severity: "HIGH"
+        patterns:
+          - "consent"
+          - "permission"
+          - "opt.*in"
+      
+      - rule: "data_minimization"
+        description: "Only necessary data should be collected"
+        severity: "MEDIUM"
+        patterns:
+          - "collect.*data"
+          - "personal.*information"
+      
+      - rule: "right_to_erasure"
+        description: "Users must have the right to delete their data"
+        severity: "HIGH"
+        patterns:
+          - "delete.*data"
+          - "erase"
+          - "forget"
+
+  # OWASP Top 10 Security Rules
+  owasp:
+    injection:
+      - rule: "sql_injection_prevention"
+        description: "Prevent SQL injection attacks"
+        severity: "CRITICAL"
+        patterns:
+          - "executeQuery"
+          - "executeUpdate"
+          - "Statement"
+      
+      - rule: "xss_prevention"
+        description: "Prevent Cross-Site Scripting attacks"
+        severity: "CRITICAL"
+        patterns:
+          - "innerHTML"
+          - "document\\.write"
+          - "eval\\("
+    
+    authentication:
+      - rule: "strong_password_policy"
+        description: "Implement strong password requirements"
+        severity: "HIGH"
+        patterns:
+          - "password.*policy"
+          - "min.*length"
+          - "complexity"
+      
+      - rule: "session_management"
+        description: "Proper session management and timeout"
+        severity: "HIGH"
+        patterns:
+          - "session.*timeout"
+          - "invalidate"
+          - "logout"
+    
+    sensitive_data:
+      - rule: "encrypt_sensitive_data"
+        description: "Encrypt sensitive data at rest and in transit"
+        severity: "CRITICAL"
+        patterns:
+          - "encrypt"
+          - "hash"
+          - "bcrypt"
+      
+      - rule: "secure_communication"
+        description: "Use secure communication protocols"
+        severity: "HIGH"
+        patterns:
+          - "https"
+          - "tls"
+          - "ssl"
+    
+    access_control:
+      - rule: "role_based_access"
+        description: "Implement role-based access control"
+        severity: "HIGH"
+        patterns:
+          - "role"
+          - "permission"
+          - "authority"
+      
+      - rule: "least_privilege"
+        description: "Follow principle of least privilege"
+        severity: "MEDIUM"
+        patterns:
+          - "admin"
+          - "root"
+          - "superuser"
+
+  # Security Headers
+  security_headers:
+    - "X-Content-Type-Options: nosniff"
+    - "X-Frame-Options: DENY"
+    - "X-XSS-Protection: 1; mode=block"
+    - "Strict-Transport-Security: max-age=31536000; includeSubDomains"
+    - "Content-Security-Policy: default-src 'self'"
+    - "Referrer-Policy: strict-origin-when-cross-origin"
+
+  # CORS Configuration
+  cors:
+    allowed_origins:
+      - "https://pulsecare.com"
+      - "https://patient.pulsecare.com"
+      - "https://staff.pulsecare.com"
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+    allowed_headers:
+      - "Authorization"
+      - "Content-Type"
+      - "X-Requested-With"
+    allow_credentials: false
+    max_age: 3600
+
+  # Rate Limiting
+  rate_limiting:
+    auth_endpoints:
+      requests_per_minute: 5
+      burst_capacity: 10
+    api_endpoints:
+      requests_per_minute: 100
+      burst_capacity: 200
+
+  # Logging and Monitoring
+  logging:
+    level: "INFO"
+    format: "JSON"
+    include_pii: false
+    audit_events:
+      - "user_login"
+      - "user_logout"
+      - "data_access"
+      - "data_modification"
+      - "admin_actions"

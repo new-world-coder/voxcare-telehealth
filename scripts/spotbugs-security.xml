@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter
+        xmlns="https://github.com/spotbugs/filter/3.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubusercontent.com/spotbugs/spotbugs/3.1.0/spotbugs/etc/findbugsfilter.xsd">
+
+    <!-- HIPAA Compliance Rules -->
+    
+    <!-- PHI Protection -->
+    <Match>
+        <Bug pattern="CRLF_INJECTION_LOGS"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: Potential PHI exposure in logs - HIPAA violation</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="PATH_TRAVERSAL_IN"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: Path traversal vulnerability could expose PHI - HIPAA violation</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="SQL_INJECTION_JDBC"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: SQL injection vulnerability could expose PHI - HIPAA violation</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="SQL_INJECTION_JPA"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: JPA SQL injection vulnerability could expose PHI - HIPAA violation</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="SQL_INJECTION_HIBERNATE"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: Hibernate SQL injection vulnerability could expose PHI - HIPAA violation</Message>
+    </Match>
+    
+    <!-- PCI DSS Compliance Rules -->
+    
+    <!-- Credit Card Data Protection -->
+    <Match>
+        <Bug pattern="HARD_CODE_PASSWORD"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: Hard-coded password could compromise payment security - PCI violation</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="HARD_CODE_CRYPTO_KEY"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: Hard-coded cryptographic key could compromise payment data - PCI violation</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="WEAK_MESSAGE_DIGEST"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: Weak message digest algorithm could compromise payment data - PCI violation</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="WEAK_MESSAGE_DIGEST_MD5"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: MD5 hash algorithm is cryptographically weak - PCI violation</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="WEAK_MESSAGE_DIGEST_SHA1"/>
+        <Priority value="2"/>
+        <Message>HIGH: SHA1 hash algorithm is cryptographically weak - PCI violation</Message>
+    </Match>
+    
+    <!-- OWASP Top 10 Security Rules -->
+    
+    <!-- Injection Vulnerabilities -->
+    <Match>
+        <Bug pattern="COMMAND_INJECTION"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: Command injection vulnerability - OWASP Top 10</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="LDAP_INJECTION"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: LDAP injection vulnerability - OWASP Top 10</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="XPATH_INJECTION"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: XPath injection vulnerability - OWASP Top 10</Message>
+    </Match>
+    
+    <!-- Authentication and Session Management -->
+    <Match>
+        <Bug pattern="WEAK_PRNG"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: Weak random number generator - OWASP Top 10</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="PREDICTABLE_RANDOM"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: Predictable random number generation - OWASP Top 10</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="HASHCODE_NO_EQUALS"/>
+        <Priority value="2"/>
+        <Message>HIGH: hashCode without equals could cause authentication issues - OWASP Top 10</Message>
+    </Match>
+    
+    <!-- Sensitive Data Exposure -->
+    <Match>
+        <Bug pattern="EXPOSE_REP"/>
+        <Priority value="2"/>
+        <Message>HIGH: Exposed representation could leak sensitive data - OWASP Top 10</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="EXPOSE_REP2"/>
+        <Priority value="2"/>
+        <Message>HIGH: Exposed representation could leak sensitive data - OWASP Top 10</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP"/>
+        <Priority value="2"/>
+        <Message>HIGH: Exposed internal representation - OWASP Top 10</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Priority value="2"/>
+        <Message>HIGH: Exposed internal representation - OWASP Top 10</Message>
+    </Match>
+    
+    <!-- Access Control -->
+    <Match>
+        <Bug pattern="J2EE_STORE_OF_NON_SERIALIZABLE_OBJECT_INTO_SESSION"/>
+        <Priority value="2"/>
+        <Message>HIGH: Non-serializable object in session could cause access control issues - OWASP Top 10</Message>
+    </Match>
+    
+    <!-- Security Misconfiguration -->
+    <Match>
+        <Bug pattern="MALICIOUS_XSS"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: Cross-site scripting vulnerability - OWASP Top 10</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="XSS_REQUEST_PARAMETER_TO_JSP_WRITER"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: XSS vulnerability in JSP - OWASP Top 10</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="XSS_REQUEST_PARAMETER_TO_SEND_ERROR"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: XSS vulnerability in error handling - OWASP Top 10</Message>
+    </Match>
+    
+    <!-- GDPR Compliance Rules -->
+    
+    <!-- Data Protection -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_STATIC_REP2"/>
+        <Priority value="2"/>
+        <Message>HIGH: Exposed static representation could violate GDPR data protection - GDPR violation</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="EI_EXPOSE_STATIC_REP"/>
+        <Priority value="2"/>
+        <Message>HIGH: Exposed static representation could violate GDPR data protection - GDPR violation</Message>
+    </Match>
+    
+    <!-- HL7 FHIR Compliance Rules -->
+    
+    <!-- FHIR Resource Security -->
+    <Match>
+        <Bug pattern="UNVALIDATED_REDIRECT"/>
+        <Priority value="2"/>
+        <Message>HIGH: Unvalidated redirect could compromise FHIR resource security - HL7 violation</Message>
+    </Match>
+    
+    <!-- General Security Issues -->
+    
+    <!-- Input Validation -->
+    <Match>
+        <Bug pattern="UNVALIDATED_REDIRECT"/>
+        <Priority value="2"/>
+        <Message>HIGH: Unvalidated redirect vulnerability</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="UNVALIDATED_REDIRECT_TO_ANY_URI"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: Unvalidated redirect to any URI</Message>
+    </Match>
+    
+    <!-- Exception Handling -->
+    <Match>
+        <Bug pattern="EXCEPTION_SOFTWARE"/>
+        <Priority value="3"/>
+        <Message>MEDIUM: Software exception could reveal system information</Message>
+    </Match>
+    
+    <!-- Resource Management -->
+    <Match>
+        <Bug pattern="OS_OPEN_STREAM"/>
+        <Priority value="2"/>
+        <Message>HIGH: Stream not properly closed</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="OS_OPEN_STREAM_EXCEPTION_PATH"/>
+        <Priority value="2"/>
+        <Message>HIGH: Stream not properly closed in exception path</Message>
+    </Match>
+    
+    <!-- Concurrency Issues -->
+    <Match>
+        <Bug pattern="DC_DOUBLECHECK"/>
+        <Priority value="2"/>
+        <Message>HIGH: Double-checked locking pattern issue</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="IS2_INCONSISTENT_SYNC"/>
+        <Priority value="2"/>
+        <Message>HIGH: Inconsistent synchronization</Message>
+    </Match>
+    
+    <!-- Performance and Security -->
+    <Match>
+        <Bug pattern="DMI_HARDCODED_ABSOLUTE_FILENAME"/>
+        <Priority value="2"/>
+        <Message>HIGH: Hardcoded absolute filename</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="DMI_CONSTANT_DB_PASSWORD"/>
+        <Priority value="1"/>
+        <Message>CRITICAL: Hardcoded database password</Message>
+    </Match>
+    
+    <!-- Exclude false positives for specific patterns -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP"/>
+        <Class name="com.pulsecare.auth.model.dto.*"/>
+        <Priority value="3"/>
+        <Message>MEDIUM: DTO classes are designed to expose data</Message>
+    </Match>
+    
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Class name="com.pulsecare.auth.model.dto.*"/>
+        <Priority value="3"/>
+        <Message>MEDIUM: DTO classes are designed to expose data</Message>
+    </Match>
+
+</FindBugsFilter>
