@@ -72,7 +72,7 @@ public class OutboundInstructionBuilder {
         };
     }
 
-    static String formatSlots(List<OpenSlot> slots) {
+    public static String formatSlots(List<OpenSlot> slots) {
         if (slots == null || slots.isEmpty()) {
             return "- (no open slots loaded; ask the patient for preferred days/times and note them)";
         }

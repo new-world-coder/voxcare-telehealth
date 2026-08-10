@@ -104,6 +104,33 @@ CREATE TABLE IF NOT EXISTS voice_call_events (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- EstateCraft-compatible voice rules + scheduled retries
+CREATE TABLE IF NOT EXISTS voice_rules (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    min_qualification_score INTEGER NOT NULL DEFAULT 70,
+    max_retries INTEGER NOT NULL DEFAULT 3,
+    retry_delay_minutes INTEGER NOT NULL DEFAULT 30,
+    sms_fallback_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    sms_fallback_template TEXT,
+    outbound_instruction TEXT NOT NULL,
+    priority INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS scheduled_follow_ups (
+    id BIGSERIAL PRIMARY KEY,
+    patient_id BIGINT,
+    scheduled_at TIMESTAMP NOT NULL,
+    type VARCHAR(64) NOT NULL DEFAULT 'voice_retry',
+    notes TEXT,
+    parent_call_id BIGINT,
+    processed BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
@@ -155,6 +182,27 @@ INSERT INTO availability (provider_id, start_time, end_time, status, created_at,
  CURRENT_DATE + INTERVAL '7 days' + INTERVAL '14 hours', 
  CURRENT_DATE + INTERVAL '7 days' + INTERVAL '15 hours', 
  'AVAILABLE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON CONFLICT DO NOTHING;
+
+-- EstateCraft-style Dial voice rules (templates use {{leadName}} / {{patientName}})
+INSERT INTO voice_rules (
+    name, enabled, min_qualification_score, max_retries, retry_delay_minutes,
+    sms_fallback_enabled, sms_fallback_template, outbound_instruction, priority
+) VALUES
+(
+    'Appointment Booking Outreach',
+    TRUE, 0, 3, 30, TRUE,
+    'Hi {{leadName}}, this is VoxCare. We tried calling to help book your telehealth visit. Reply YES or call us back to schedule!',
+    'You are a friendly telehealth scheduling assistant for VoxCare. Greet {{leadName}} warmly, offer available appointment slots, and book the time they confirm. Be concise and HIPAA-aware: do not discuss diagnoses.',
+    10
+),
+(
+    'Appointment Reminder Follow-up',
+    TRUE, 0, 2, 60, TRUE,
+    'Hi {{leadName}}, VoxCare reminder: you have an upcoming telehealth appointment. Reply YES to confirm or call to reschedule.',
+    'You are calling on behalf of VoxCare. Remind {{leadName}} about their upcoming telehealth appointment and offer to reschedule if needed. Do not discuss clinical details.',
+    5
+)
 ON CONFLICT DO NOTHING;
 
 -- Create function to update updated_at timestamp

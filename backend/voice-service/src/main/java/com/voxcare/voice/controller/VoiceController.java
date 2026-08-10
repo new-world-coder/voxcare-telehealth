@@ -2,6 +2,8 @@ package com.voxcare.voice.controller;
 
 import com.voxcare.voice.dto.InitiateVoiceCallRequest;
 import com.voxcare.voice.dto.VoiceCallResponse;
+import com.voxcare.voice.orchestrator.CommunicationOrchestrator;
+import com.voxcare.voice.orchestrator.VoiceRuleConfig;
 import com.voxcare.voice.service.VoiceCallService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -17,14 +19,40 @@ import java.util.Map;
 public class VoiceController {
 
     private final VoiceCallService voiceCallService;
+    private final CommunicationOrchestrator orchestrator;
 
-    public VoiceController(VoiceCallService voiceCallService) {
+    public VoiceController(VoiceCallService voiceCallService, CommunicationOrchestrator orchestrator) {
         this.voiceCallService = voiceCallService;
+        this.orchestrator = orchestrator;
     }
 
     @PostMapping("/calls")
     public ResponseEntity<VoiceCallResponse> initiateCall(@Valid @RequestBody InitiateVoiceCallRequest request) {
-        return new ResponseEntity<>(voiceCallService.initiateCall(request), HttpStatus.CREATED);
+        VoiceRuleConfig rule = orchestrator.resolveActiveRule();
+        // If client supplied a custom instruction, temporarily prefer it via a synthetic rule overlay
+        if (request.getOutboundInstruction() != null && !request.getOutboundInstruction().isBlank()) {
+            rule = new VoiceRuleConfig(
+                    rule.id(),
+                    rule.name(),
+                    rule.enabled(),
+                    rule.minQualificationScore(),
+                    rule.maxRetries(),
+                    rule.retryDelayMinutes(),
+                    rule.smsFallbackEnabled(),
+                    rule.smsFallbackTemplate(),
+                    request.getOutboundInstruction(),
+                    rule.priority());
+        }
+        VoiceCallResponse created = orchestrator.triggerOutboundCall(
+                request.getPatientId(),
+                request.getTo(),
+                request.getProviderId(),
+                request.getAppointmentId(),
+                request.getPurpose(),
+                rule,
+                0,
+                null);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @GetMapping("/calls/{id}")
@@ -52,11 +80,15 @@ public class VoiceController {
         return voiceCallService.providerHealth();
     }
 
-    /**
-     * Enqueue REMINDER calls for appointments returned by appointment-service.
-     */
     @PostMapping("/reminders/enqueue")
     public Map<String, Object> enqueueReminders() {
         return voiceCallService.enqueueReminderCalls();
+    }
+
+    /** Process due EstateCraft-style scheduled_follow_ups (voice_retry). */
+    @PostMapping("/retries/process")
+    public Map<String, Object> processRetries() {
+        int processed = orchestrator.processDueRetries();
+        return Map.of("processed", processed);
     }
 }

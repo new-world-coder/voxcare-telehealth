@@ -124,14 +124,16 @@ const Dashboard: React.FC = () => {
     setVoiceStatus('Starting AI call…');
     try {
       const payload: Record<string, unknown> = {
+        patientId: callForm.patientId ? Number(callForm.patientId) : undefined,
         purpose: callForm.purpose,
       };
-      if (callForm.patientId) payload.patientId = Number(callForm.patientId);
       if (callForm.providerId) payload.providerId = Number(callForm.providerId);
       if (callForm.to) payload.to = callForm.to;
 
-      const res = await axios.post('/api/voice/calls', payload);
-      setVoiceStatus(`Call queued (${res.data.provider}): ${res.data.status} — id ${res.data.id}`);
+      // EstateCraft-compatible communications API
+      const res = await axios.post('/api/communications/call', payload);
+      const data = res.data?.data || res.data;
+      setVoiceStatus(`Call queued (${data.provider}): ${data.status} — id ${data.id}`);
       setShowCallModal(false);
     } catch (err: unknown) {
       const message = axios.isAxiosError(err)

@@ -50,6 +50,24 @@ spring:
             - Path=/api/voice/**
           filters:
             - StripPrefix=1
+        - id: voice-communications
+          uri: lb://voice-service
+          predicates:
+            - Path=/api/communications/**
+          filters:
+            - StripPrefix=1
+        - id: voice-rules
+          uri: lb://voice-service
+          predicates:
+            - Path=/api/voice-rules/**
+          filters:
+            - StripPrefix=1
+        - id: voice-webhooks
+          uri: lb://voice-service
+          predicates:
+            - Path=/api/webhooks/**
+          filters:
+            - StripPrefix=1
 
 server:
   port: 8080
