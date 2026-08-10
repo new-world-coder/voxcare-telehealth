@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS patients (
     last_name VARCHAR(100) NOT NULL,
     dob DATE,
     phone VARCHAR(20),
+    phone_normalized VARCHAR(32),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -39,6 +40,8 @@ CREATE TABLE IF NOT EXISTS patients (
 CREATE TABLE IF NOT EXISTS providers (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
     specialty VARCHAR(100) NOT NULL,
     timezone VARCHAR(50) NOT NULL DEFAULT 'UTC',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -103,6 +106,7 @@ CREATE TABLE IF NOT EXISTS voice_call_events (
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_patients_user_id ON patients(user_id);
+CREATE INDEX IF NOT EXISTS idx_patients_phone_normalized ON patients(phone_normalized);
 CREATE INDEX IF NOT EXISTS idx_providers_user_id ON providers(user_id);
 CREATE INDEX IF NOT EXISTS idx_availability_provider_id ON availability(provider_id);
 CREATE INDEX IF NOT EXISTS idx_availability_start_time ON availability(start_time);
@@ -126,13 +130,13 @@ INSERT INTO users (email, password_hash, role, created_at, updated_at) VALUES
 ON CONFLICT (email) DO NOTHING;
 
 -- Insert demo provider profile
-INSERT INTO providers (user_id, specialty, timezone, created_at, updated_at) VALUES
-((SELECT id FROM users WHERE email = 'provider1@demo.dev'), 'General Practice', 'America/New_York', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+INSERT INTO providers (user_id, first_name, last_name, specialty, timezone, created_at, updated_at) VALUES
+((SELECT id FROM users WHERE email = 'provider1@demo.dev'), 'Ada', 'Smith', 'General Practice', 'America/New_York', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT DO NOTHING;
 
 -- Insert demo patient profile
-INSERT INTO patients (user_id, first_name, last_name, dob, phone, created_at, updated_at) VALUES
-((SELECT id FROM users WHERE email = 'patient1@demo.dev'), 'John', 'Doe', '1990-01-01', '+1-555-0123', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+INSERT INTO patients (user_id, first_name, last_name, dob, phone, phone_normalized, created_at, updated_at) VALUES
+((SELECT id FROM users WHERE email = 'patient1@demo.dev'), 'John', 'Doe', '1990-01-01', '+15550123', '15550123', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT DO NOTHING;
 
 -- Insert demo availability slots (next week)

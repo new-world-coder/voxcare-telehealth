@@ -339,6 +339,7 @@ services:
       DIAL_FROM_NUMBER_ID: ${DIAL_FROM_NUMBER_ID:-}
       VOICE_SMS_FALLBACK_ENABLED: ${VOICE_SMS_FALLBACK_ENABLED:-true}
       VOICE_DEFAULT_CLINIC_NAME: ${VOICE_DEFAULT_CLINIC_NAME:-PulseCare}
+      PATIENT_SERVICE_BASE_URL: http://patient-service:8082
     depends_on:
       discovery-service:
         condition: service_healthy

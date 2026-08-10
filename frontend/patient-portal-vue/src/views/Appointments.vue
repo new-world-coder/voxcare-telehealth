@@ -150,7 +150,8 @@ export default {
         const endTime = `${newAppointment.value.date}T${newAppointment.value.time.split(':')[0] + 1}:00:00`
         
         const response = await axios.post('/api/appointments', {
-          providerId: newAppointment.value.providerId,
+          patientId: 1,
+          providerId: Number(newAppointment.value.providerId),
           startTime,
           endTime,
           notes: newAppointment.value.notes

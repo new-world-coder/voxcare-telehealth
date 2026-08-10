@@ -10,3 +10,7 @@ eureka:
       defaultZone: http://discovery-service:8761/eureka/
   instance:
     hostname: voice-service
+
+pulsecare:
+  voice:
+    patient-service-base-url: http://patient-service:8082

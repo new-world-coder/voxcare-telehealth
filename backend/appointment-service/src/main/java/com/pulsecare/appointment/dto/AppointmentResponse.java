@@ -138,4 +138,17 @@ public class AppointmentResponse {
     public void setCancelledAt(LocalDateTime cancelledAt) {
         this.cancelledAt = cancelledAt;
     }
+
+    /** Portal-compatible alias for appointmentDate. */
+    public LocalDateTime getStartTime() {
+        return appointmentDate;
+    }
+
+    /** Portal-compatible end bound derived from duration. */
+    public LocalDateTime getEndTime() {
+        if (appointmentDate == null || durationMinutes == null) {
+            return null;
+        }
+        return appointmentDate.plusMinutes(durationMinutes);
+    }
 }

@@ -32,6 +32,14 @@ public class AppointmentService {
      * Create a new appointment
      */
     public AppointmentResponse createAppointment(CreateAppointmentRequest request) {
+        request.normalize();
+        if (request.getPatientId() == null || request.getProviderId() == null) {
+            throw new RuntimeException("patientId and providerId are required");
+        }
+        if (request.getAppointmentDate() == null || request.getDurationMinutes() == null) {
+            throw new RuntimeException("Provide appointmentDate/durationMinutes or startTime/endTime");
+        }
+
         // Check for scheduling conflicts
         if (hasSchedulingConflict(request.getProviderId(), request.getAppointmentDate(), request.getDurationMinutes())) {
             throw new RuntimeException("Scheduling conflict detected for the requested time slot");

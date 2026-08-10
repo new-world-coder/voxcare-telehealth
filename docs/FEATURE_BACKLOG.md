@@ -2,13 +2,15 @@
 
 Prioritized work after the GetDial strategy scaffold. Details: [`ASSESSMENT.md`](./ASSESSMENT.md), [`GETDIAL_INTEGRATION_STRATEGY.md`](./GETDIAL_INTEGRATION_STRATEGY.md).
 
+**Rename:** pick a name in [`RENAME_PROPOSAL.md`](./RENAME_PROPOSAL.md) before we rebrand the repo.
+
 ## P0 — Unblock dialer booking
 
-1. Implement **patient-service** CRUD + `GET /patients/by-phone/{e164}`
-2. Implement **provider-service** list + specialty filters
-3. Expose **availability** open-slot APIs (table already exists in SQL)
-4. Align appointment create DTO with patient portal fields
-5. Staff portal: “Call to book / remind” → `POST /api/voice/calls`
+1. [x] Implement **patient-service** CRUD + `GET /patients/by-phone/{phone}`
+2. [x] Implement **provider-service** list + specialty filters
+3. [x] Expose **availability** open-slot APIs (`GET /providers/slots/open`)
+4. [x] Align appointment create DTO with portal `startTime`/`endTime`
+5. [x] Staff portal: “AI Call to Book / Remind” → `POST /api/voice/calls`
 
 ## P1 — Live GetDial
 
@@ -16,6 +18,7 @@ Prioritized work after the GetDial strategy scaffold. Details: [`ASSESSMENT.md`]
 2. Register webhook `POST /api/voice/webhooks/dial`
 3. SMS fallback on no-answer
 4. Reminder job from `/appointments/reminders`
+5. Inject open slots into Dial `outboundInstruction` automatically
 
 ## P2 — Platform
 
@@ -30,5 +33,5 @@ Prioritized work after the GetDial strategy scaffold. Details: [`ASSESSMENT.md`]
 curl -s http://localhost:8087/voice/providers/health | jq .
 curl -s -X POST http://localhost:8087/voice/calls \
   -H 'Content-Type: application/json' \
-  -d '{"to":"+15551234567","purpose":"BOOKING","patientId":1}'
+  -d '{"patientId":1,"purpose":"BOOKING"}'
 ```

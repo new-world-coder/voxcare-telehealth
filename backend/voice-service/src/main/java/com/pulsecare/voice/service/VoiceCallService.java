@@ -31,25 +31,37 @@ public class VoiceCallService {
     private final VoiceProvider voiceProvider;
     private final VoiceCallRepository repository;
     private final VoiceProperties properties;
+    private final PatientLookupClient patientLookupClient;
 
     public VoiceCallService(
             VoiceProvider voiceProvider,
             VoiceCallRepository repository,
-            VoiceProperties properties) {
+            VoiceProperties properties,
+            PatientLookupClient patientLookupClient) {
         this.voiceProvider = voiceProvider;
         this.repository = repository;
         this.properties = properties;
+        this.patientLookupClient = patientLookupClient;
     }
 
     @Transactional
     public VoiceCallResponse initiateCall(InitiateVoiceCallRequest request) {
+        String to = request.getTo();
+        if ((to == null || to.isBlank()) && request.getPatientId() != null) {
+            to = patientLookupClient.findPhoneByPatientId(request.getPatientId());
+        }
+        if (to == null || to.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Phone number required (pass 'to' or a patientId with phone on file)");
+        }
+
         String instruction = request.getOutboundInstruction();
         if (instruction == null || instruction.isBlank()) {
             instruction = buildDefaultInstruction(request.getPurpose());
         }
 
         CallResult result = voiceProvider.initiateCall(new InitiateCallParams(
-                request.getTo(),
+                to,
                 null,
                 instruction,
                 request.getPatientId(),
@@ -62,7 +74,7 @@ public class VoiceCallService {
         call.setPatientId(request.getPatientId());
         call.setAppointmentId(request.getAppointmentId());
         call.setProviderId(request.getProviderId());
-        call.setToNumber(request.getTo());
+        call.setToNumber(to);
         call.setStatus(result.status().name());
         call.setOutboundInstruction(instruction);
         call.setRetryCount(0);

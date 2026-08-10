@@ -8,7 +8,7 @@ public class InitiateVoiceCallRequest {
 
     private Long patientId;
 
-    @NotBlank
+    /** Optional when patientId is set and patient-service can resolve phone. */
     private String to;
 
     @NotNull

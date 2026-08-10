@@ -1,43 +1,47 @@
 package com.pulsecare.appointment.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 /**
- * DTO for creating a new appointment
+ * DTO for creating a new appointment.
+ * Accepts either appointmentDate + durationMinutes, or startTime + endTime (portal-friendly).
  */
 public class CreateAppointmentRequest {
 
-    @NotNull(message = "Patient ID is required")
     private Long patientId;
 
-    @NotNull(message = "Provider ID is required")
     private Long providerId;
 
-    @NotNull(message = "Appointment date is required")
+    @JsonAlias({"startTime", "start_time"})
     @Future(message = "Appointment date must be in the future")
     private LocalDateTime appointmentDate;
 
-    @NotNull(message = "Duration is required")
     @Min(value = 15, message = "Duration must be at least 15 minutes")
-    @Min(value = 480, message = "Duration cannot exceed 8 hours")
+    @Max(value = 480, message = "Duration cannot exceed 8 hours")
     private Integer durationMinutes;
+
+    @JsonAlias({"end_time"})
+    private LocalDateTime endTime;
 
     private String notes;
 
-    // Constructors
     public CreateAppointmentRequest() {}
 
-    public CreateAppointmentRequest(Long patientId, Long providerId, LocalDateTime appointmentDate, Integer durationMinutes) {
-        this.patientId = patientId;
-        this.providerId = providerId;
-        this.appointmentDate = appointmentDate;
-        this.durationMinutes = durationMinutes;
+    public void normalize() {
+        if (appointmentDate != null && durationMinutes == null && endTime != null) {
+            long minutes = ChronoUnit.MINUTES.between(appointmentDate, endTime);
+            durationMinutes = (int) Math.max(minutes, 15);
+        }
+        if (appointmentDate != null && durationMinutes != null && endTime == null) {
+            endTime = appointmentDate.plusMinutes(durationMinutes);
+        }
     }
 
-    // Getters and Setters
     public Long getPatientId() {
         return patientId;
     }
@@ -62,12 +66,29 @@ public class CreateAppointmentRequest {
         this.appointmentDate = appointmentDate;
     }
 
+    /** Portal alias setter for startTime JSON field. */
+    public void setStartTime(LocalDateTime startTime) {
+        this.appointmentDate = startTime;
+    }
+
+    public LocalDateTime getStartTime() {
+        return appointmentDate;
+    }
+
     public Integer getDurationMinutes() {
         return durationMinutes;
     }
 
     public void setDurationMinutes(Integer durationMinutes) {
         this.durationMinutes = durationMinutes;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
     public String getNotes() {

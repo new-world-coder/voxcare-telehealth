@@ -164,6 +164,58 @@ th {
   color: #757575;
 }
 
+.voice-banner {
+  background: #e8f4fd;
+  border: 1px solid #90caf9;
+  color: #1565c0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: min(480px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.modal-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.modal-card input,
+.modal-card select {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
 .loading {
   display: flex;
   justify-content: center;

@@ -17,6 +17,8 @@ public class VoiceProperties {
     private int retryDelayMinutes = 30;
     private boolean smsFallbackEnabled = true;
     private String defaultClinicName = "PulseCare";
+    /** Base URL for patient-service (used to resolve phone by patientId). */
+    private String patientServiceBaseUrl = "http://localhost:8082";
 
     public String getProvider() {
         return provider;
@@ -88,5 +90,13 @@ public class VoiceProperties {
 
     public void setDefaultClinicName(String defaultClinicName) {
         this.defaultClinicName = defaultClinicName;
+    }
+
+    public String getPatientServiceBaseUrl() {
+        return patientServiceBaseUrl;
+    }
+
+    public void setPatientServiceBaseUrl(String patientServiceBaseUrl) {
+        this.patientServiceBaseUrl = patientServiceBaseUrl;
     }
 }
