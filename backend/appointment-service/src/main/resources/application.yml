@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/pulsecare
-    username: pulsecare
-    password: pulsecare
+    url: jdbc:postgresql://postgres:5432/voxcare
+    username: voxcare
+    password: voxcare
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -36,5 +36,5 @@ management:
 
 logging:
   level:
-    com.pulsecare.appointment: DEBUG
+    com.voxcare.appointment: DEBUG
     org.springframework.web: INFO

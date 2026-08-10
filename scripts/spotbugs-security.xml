@@ -249,14 +249,14 @@
     <!-- Exclude false positives for specific patterns -->
     <Match>
         <Bug pattern="EI_EXPOSE_REP"/>
-        <Class name="com.pulsecare.auth.model.dto.*"/>
+        <Class name="com.voxcare.auth.model.dto.*"/>
         <Priority value="3"/>
         <Message>MEDIUM: DTO classes are designed to expose data</Message>
     </Match>
     
     <Match>
         <Bug pattern="EI_EXPOSE_REP2"/>
-        <Class name="com.pulsecare.auth.model.dto.*"/>
+        <Class name="com.voxcare.auth.model.dto.*"/>
         <Priority value="3"/>
         <Message>MEDIUM: DTO classes are designed to expose data</Message>
     </Match>

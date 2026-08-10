@@ -1,4 +1,4 @@
-# PulseCare Telehealth Scheduler
+# VoxCare Telehealth Scheduler
 
 A production-grade, horizontally scalable telehealth platform built with Spring Boot microservices, React/Vue frontends, and Kubernetes deployment.
 
@@ -14,7 +14,7 @@ A production-grade, horizontally scalable telehealth platform built with Spring 
 ```bash
 # Clone and setup
 git clone <your-repo-url>
-cd pulsecare-telehealth
+cd voxcare-telehealth
 make init
 
 # Start all services
@@ -100,8 +100,8 @@ graph TB
 ./scripts/load_test_hpa.sh
 
 # Watch scaling in action
-kubectl get hpa -n pulsecare
-kubectl get pods -n pulsecare
+kubectl get hpa -n voxcare
+kubectl get pods -n voxcare
 ```
 
 ## 🚀 Cloud Deployment
@@ -115,13 +115,13 @@ kubectl get pods -n pulsecare
 ./scripts/gke_deploy.sh
 
 # Get public URL
-kubectl get ingress -n pulsecare
+kubectl get ingress -n voxcare
 ```
 
 ### Required Environment Variables
 ```bash
 GCP_PROJECT_ID=your-project-id
-GKE_CLUSTER=pulsecare-cluster
+GKE_CLUSTER=voxcare-cluster
 GKE_ZONE=us-central1-a
 GCP_SA_KEY=path/to/service-account.json
 GCR_REPOSITORY=gcr.io/your-project
@@ -191,8 +191,16 @@ This repository was generated using AI assistance with the following approach:
 - **Appointment Service**: `/api/appointments/*`
 - **Telehealth Service**: `/api/telehealth/*`
 - **Notification Service**: `/api/notify/*`
+- **Voice Service** (GetDial / mock): `/api/voice/*`
 
 Swagger UI available at: `http://localhost:8080/swagger-ui.html`
+
+## 🧭 Product Strategy Docs
+
+- [`docs/ASSESSMENT.md`](docs/ASSESSMENT.md) — RCM share, multi-tenant SaaS readiness, dialer fit
+- [`docs/GETDIAL_INTEGRATION_STRATEGY.md`](docs/GETDIAL_INTEGRATION_STRATEGY.md) — integration plan
+- [`docs/DIAL_INTEGRATION.md`](docs/DIAL_INTEGRATION.md) — EstateCraft-compatible Dial setup (same env + API contract)
+- [`docs/FEATURE_BACKLOG.md`](docs/FEATURE_BACKLOG.md) — prioritized next features
 
 ## 🧪 Testing
 
@@ -241,7 +249,7 @@ curl http://localhost:8080/actuator/health
 docker-compose logs -f [service-name]
 
 # Database connection
-docker-compose exec postgres psql -U pulsecare
+docker-compose exec postgres psql -U voxcare
 ```
 
 ## 📄 License

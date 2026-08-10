@@ -2,7 +2,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: appointment-service-hpa
-  namespace: pulsecare
+  namespace: voxcare
   labels:
     app: appointment-service
     component: autoscaling

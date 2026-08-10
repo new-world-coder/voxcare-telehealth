@@ -1,8 +1,8 @@
-// PulseCare MongoDB Initialization Script
+// VoxCare MongoDB Initialization Script
 // This script creates the database collections and initial data
 
-// Switch to pulsecare database
-db = db.getSiblingDB('pulsecare');
+// Switch to voxcare database
+db = db.getSiblingDB('voxcare');
 
 // Create audit_events collection
 db.createCollection('audit_events');
@@ -116,10 +116,10 @@ db.notification_logs.insertMany([
 
 // Create users for MongoDB authentication (if needed)
 db.createUser({
-    user: "pulsecare",
-    pwd: "pulsecare123",
+    user: "voxcare",
+    pwd: "voxcare123",
     roles: [
-        { role: "readWrite", db: "pulsecare" }
+        { role: "readWrite", db: "voxcare" }
     ]
 });
 

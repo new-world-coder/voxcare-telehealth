@@ -146,11 +146,14 @@ export default {
 
     const bookAppointment = async () => {
       try {
+        const [hour, minute] = newAppointment.value.time.split(':').map(Number)
         const startTime = `${newAppointment.value.date}T${newAppointment.value.time}:00`
-        const endTime = `${newAppointment.value.date}T${newAppointment.value.time.split(':')[0] + 1}:00:00`
+        const endHour = String(hour + 1).padStart(2, '0')
+        const endTime = `${newAppointment.value.date}T${endHour}:${String(minute).padStart(2, '0')}:00`
         
         const response = await axios.post('/api/appointments', {
-          providerId: newAppointment.value.providerId,
+          patientId: 1,
+          providerId: Number(newAppointment.value.providerId),
           startTime,
           endTime,
           notes: newAppointment.value.notes

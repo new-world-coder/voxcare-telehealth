@@ -1,8 +1,8 @@
 {
   "dashboard": {
     "id": null,
-    "title": "PulseCare Services Overview",
-    "tags": ["pulsecare", "microservices"],
+    "title": "VoxCare Services Overview",
+    "tags": ["voxcare", "microservices"],
     "style": "dark",
     "timezone": "browser",
     "panels": [

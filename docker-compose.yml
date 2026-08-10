@@ -4,32 +4,32 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: pulsecare-postgres
+    container_name: voxcare-postgres
     environment:
-      POSTGRES_DB: pulsecare
-      POSTGRES_USER: pulsecare
-      POSTGRES_PASSWORD: pulsecare123
+      POSTGRES_DB: voxcare
+      POSTGRES_USER: voxcare
+      POSTGRES_PASSWORD: voxcare123
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pulsecare"]
+      test: ["CMD-SHELL", "pg_isready -U voxcare"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   # MongoDB Database
   mongo:
     image: mongo:7.0
-    container_name: pulsecare-mongo
+    container_name: voxcare-mongo
     environment:
-      MONGO_INITDB_ROOT_USERNAME: pulsecare
-      MONGO_INITDB_ROOT_PASSWORD: pulsecare123
-      MONGO_INITDB_DATABASE: pulsecare
+      MONGO_INITDB_ROOT_USERNAME: voxcare
+      MONGO_INITDB_ROOT_PASSWORD: voxcare123
+      MONGO_INITDB_DATABASE: voxcare
     ports:
       - "27017:27017"
     volumes:
@@ -41,12 +41,12 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   # Kafka (Optional - for domain events)
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
-    container_name: pulsecare-zookeeper
+    container_name: voxcare-zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -58,11 +58,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   kafka:
     image: confluentinc/cp-kafka:7.4.0
-    container_name: pulsecare-kafka
+    container_name: voxcare-kafka
     depends_on:
       zookeeper:
         condition: service_healthy
@@ -82,14 +82,14 @@ services:
       timeout: 10s
       retries: 5
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   # Eureka Service Discovery
   discovery-service:
     build:
       context: ./backend/discovery-service
       dockerfile: Dockerfile
-    container_name: pulsecare-discovery
+    container_name: voxcare-discovery
     ports:
       - "8761:8761"
     environment:
@@ -102,14 +102,14 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   # Config Service
   config-service:
     build:
       context: ./backend/config-service
       dockerfile: Dockerfile
-    container_name: pulsecare-config
+    container_name: voxcare-config
     ports:
       - "8888:8888"
     environment:
@@ -125,14 +125,14 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   # Auth Service
   auth-service:
     build:
       context: ./backend/auth-service
       dockerfile: Dockerfile
-    container_name: pulsecare-auth
+    container_name: voxcare-auth
     ports:
       - "8081:8081"
     environment:
@@ -140,9 +140,9 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       EUREKA_INSTANCE_HOSTNAME: auth-service
       SPRING_CLOUD_CONFIG_URI: http://config-service:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pulsecare
-      SPRING_DATASOURCE_USERNAME: pulsecare
-      SPRING_DATASOURCE_PASSWORD: pulsecare123
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/voxcare
+      SPRING_DATASOURCE_USERNAME: voxcare
+      SPRING_DATASOURCE_PASSWORD: voxcare123
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
     depends_on:
       discovery-service:
@@ -157,14 +157,14 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   # Patient Service
   patient-service:
     build:
       context: ./backend/patient-service
       dockerfile: Dockerfile
-    container_name: pulsecare-patient
+    container_name: voxcare-patient
     ports:
       - "8082:8082"
     environment:
@@ -172,9 +172,9 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       EUREKA_INSTANCE_HOSTNAME: patient-service
       SPRING_CLOUD_CONFIG_URI: http://config-service:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pulsecare
-      SPRING_DATASOURCE_USERNAME: pulsecare
-      SPRING_DATASOURCE_PASSWORD: pulsecare123
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/voxcare
+      SPRING_DATASOURCE_USERNAME: voxcare
+      SPRING_DATASOURCE_PASSWORD: voxcare123
     depends_on:
       discovery-service:
         condition: service_healthy
@@ -188,14 +188,14 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   # Provider Service
   provider-service:
     build:
       context: ./backend/provider-service
       dockerfile: Dockerfile
-    container_name: pulsecare-provider
+    container_name: voxcare-provider
     ports:
       - "8083:8083"
     environment:
@@ -203,9 +203,9 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       EUREKA_INSTANCE_HOSTNAME: provider-service
       SPRING_CLOUD_CONFIG_URI: http://config-service:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pulsecare
-      SPRING_DATASOURCE_USERNAME: pulsecare
-      SPRING_DATASOURCE_PASSWORD: pulsecare123
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/voxcare
+      SPRING_DATASOURCE_USERNAME: voxcare
+      SPRING_DATASOURCE_PASSWORD: voxcare123
     depends_on:
       discovery-service:
         condition: service_healthy
@@ -219,14 +219,14 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   # Appointment Service
   appointment-service:
     build:
       context: ./backend/appointment-service
       dockerfile: Dockerfile
-    container_name: pulsecare-appointment
+    container_name: voxcare-appointment
     ports:
       - "8084:8084"
     environment:
@@ -234,9 +234,9 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       EUREKA_INSTANCE_HOSTNAME: appointment-service
       SPRING_CLOUD_CONFIG_URI: http://config-service:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pulsecare
-      SPRING_DATASOURCE_USERNAME: pulsecare
-      SPRING_DATASOURCE_PASSWORD: pulsecare123
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/voxcare
+      SPRING_DATASOURCE_USERNAME: voxcare
+      SPRING_DATASOURCE_PASSWORD: voxcare123
       KAFKA_ENABLED: false
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
@@ -252,14 +252,14 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   # Telehealth Service
   telehealth-service:
     build:
       context: ./backend/telehealth-service
       dockerfile: Dockerfile
-    container_name: pulsecare-telehealth
+    container_name: voxcare-telehealth
     ports:
       - "8085:8085"
     environment:
@@ -268,7 +268,7 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       EUREKA_INSTANCE_HOSTNAME: telehealth-service
       SPRING_CLOUD_CONFIG_URI: http://config-service:8888
-      SPRING_DATA_MONGODB_URI: mongodb://pulsecare:pulsecare123@mongo:27017/pulsecare?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb://voxcare:voxcare123@mongo:27017/voxcare?authSource=admin
       JITSI_BASE_URL: https://meet.jit.si
     depends_on:
       discovery-service:
@@ -283,14 +283,14 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   # Notification Service
   notification-service:
     build:
       context: ./backend/notification-service
       dockerfile: Dockerfile
-    container_name: pulsecare-notification
+    container_name: voxcare-notification
     ports:
       - "8086:8086"
     environment:
@@ -299,7 +299,7 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       EUREKA_INSTANCE_HOSTNAME: notification-service
       SPRING_CLOUD_CONFIG_URI: http://config-service:8888
-      SPRING_DATA_MONGODB_URI: mongodb://pulsecare:pulsecare123@mongo:27017/pulsecare?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb://voxcare:voxcare123@mongo:27017/voxcare?authSource=admin
       SENDGRID_API_KEY: your-sendgrid-api-key
       SENDGRID_ENABLED: false
     depends_on:
@@ -315,14 +315,54 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      - pulsecare-network
+      - voxcare-network
+
+  # Voice Service (GetDial / mock voice AI for booking + reminders)
+  voice-service:
+    build:
+      context: ./backend/voice-service
+      dockerfile: Dockerfile
+    container_name: voxcare-voice
+    ports:
+      - "8087:8087"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8087
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: voice-service
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/voxcare
+      SPRING_DATASOURCE_USERNAME: voxcare
+      SPRING_DATASOURCE_PASSWORD: voxcare123
+      VOICE_PROVIDER: ${VOICE_PROVIDER:-mock}
+      DIAL_API_KEY: ${DIAL_API_KEY:-}
+      DIAL_BASE_URL: ${DIAL_BASE_URL:-https://api.getdial.ai}
+      DIAL_FROM_NUMBER_ID: ${DIAL_FROM_NUMBER_ID:-}
+      VOICE_SMS_FALLBACK_ENABLED: ${VOICE_SMS_FALLBACK_ENABLED:-true}
+      VOICE_DEFAULT_CLINIC_NAME: ${VOICE_DEFAULT_CLINIC_NAME:-VoxCare}
+      DIAL_WEBHOOK_SECRET: ${DIAL_WEBHOOK_SECRET:-}
+      PATIENT_SERVICE_BASE_URL: http://patient-service:8082
+      PROVIDER_SERVICE_BASE_URL: http://provider-service:8083
+      APPOINTMENT_SERVICE_BASE_URL: http://appointment-service:8084
+      SMS_FALLBACK_BOOKING_URL: ${SMS_FALLBACK_BOOKING_URL:-http://localhost:3001/appointments}
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8087/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - voxcare-network
 
   # API Gateway
   api-gateway:
     build:
       context: ./backend/api-gateway
       dockerfile: Dockerfile
-    container_name: pulsecare-gateway
+    container_name: voxcare-gateway
     ports:
       - "8080:8080"
     environment:
@@ -342,14 +382,14 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   # Staff Portal (React)
   staff-portal:
     build:
       context: ./frontend/staff-portal-react
       dockerfile: Dockerfile
-    container_name: pulsecare-staff-portal
+    container_name: voxcare-staff-portal
     ports:
       - "3000:3000"
     environment:
@@ -359,14 +399,14 @@ services:
       api-gateway:
         condition: service_healthy
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   # Patient Portal (Vue)
   patient-portal:
     build:
       context: ./frontend/patient-portal-vue
       dockerfile: Dockerfile
-    container_name: pulsecare-patient-portal
+    container_name: voxcare-patient-portal
     ports:
       - "3001:3000"
     environment:
@@ -376,12 +416,12 @@ services:
       api-gateway:
         condition: service_healthy
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   # Prometheus (Optional - for metrics)
   prometheus:
     image: prom/prometheus:latest
-    container_name: pulsecare-prometheus
+    container_name: voxcare-prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -395,12 +435,12 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
     networks:
-      - pulsecare-network
+      - voxcare-network
 
   # Grafana (Optional - for dashboards)
   grafana:
     image: grafana/grafana:latest
-    container_name: pulsecare-grafana
+    container_name: voxcare-grafana
     ports:
       - "3002:3000"
     environment:
@@ -413,7 +453,7 @@ services:
       prometheus:
         condition: service_started
     networks:
-      - pulsecare-network
+      - voxcare-network
 
 volumes:
   postgres_data:
@@ -422,5 +462,5 @@ volumes:
   grafana_data:
 
 networks:
-  pulsecare-network:
+  voxcare-network:
     driver: bridge

@@ -1,8 +1,8 @@
-# PulseCare Security Compliance Guide
+# VoxCare Security Compliance Guide
 
 ## Overview
 
-This document outlines the comprehensive security measures implemented in the PulseCare telehealth platform to ensure compliance with HIPAA, PCI DSS, HL7 FHIR, GDPR, and OWASP security standards.
+This document outlines the comprehensive security measures implemented in the VoxCare telehealth platform to ensure compliance with HIPAA, PCI DSS, HL7 FHIR, GDPR, and OWASP security standards.
 
 ## Compliance Frameworks
 
@@ -230,7 +230,7 @@ public HeaderWriterFilter headerWriterFilter() {
 ```yaml
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/pulsecare
+    url: jdbc:postgresql://localhost:5432/voxcare
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     hikari:
@@ -400,7 +400,7 @@ public class PatientController {
 
 ## Conclusion
 
-This security compliance guide provides a comprehensive framework for maintaining security and compliance in the PulseCare telehealth platform. Regular review and updates of this document ensure continued adherence to security best practices and regulatory requirements.
+This security compliance guide provides a comprehensive framework for maintaining security and compliance in the VoxCare telehealth platform. Regular review and updates of this document ensure continued adherence to security best practices and regulatory requirements.
 
 ## Resources
 

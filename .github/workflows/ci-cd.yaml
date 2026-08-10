@@ -1,4 +1,4 @@
-name: PulseCare CI/CD Pipeline
+name: VoxCare CI/CD Pipeline
 
 on:
   push:
@@ -331,17 +331,17 @@ jobs:
         kubectl apply -f k8s/hpa-appointment.yaml
         
         # Wait for deployment
-        kubectl rollout status deployment/api-gateway -n pulsecare --timeout=300s
+        kubectl rollout status deployment/api-gateway -n voxcare --timeout=300s
         
     - name: Get deployment status
       run: |
-        kubectl get pods -n pulsecare
-        kubectl get services -n pulsecare
-        kubectl get ingress -n pulsecare
+        kubectl get pods -n voxcare
+        kubectl get services -n voxcare
+        kubectl get ingress -n voxcare
         
     - name: Get public URL
       run: |
-        echo "Public URL: $(kubectl get ingress -n pulsecare -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}')"
+        echo "Public URL: $(kubectl get ingress -n voxcare -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}')"
         
   # Security and Quality Checks
   security:
@@ -389,7 +389,7 @@ jobs:
       run: |
         if [ "${{ needs.deploy.result }}" == "success" ]; then
           echo "✅ Deployment successful!"
-          echo "🚀 PulseCare is now running on GKE"
+          echo "🚀 VoxCare is now running on GKE"
           echo "🌐 Public URL: ${{ needs.deploy.outputs.url }}"
         else
           echo "❌ Deployment failed!"

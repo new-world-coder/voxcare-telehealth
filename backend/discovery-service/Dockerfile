@@ -1,4 +1,4 @@
-# Multi-stage build for PulseCare Discovery Service
+# Multi-stage build for VoxCare Discovery Service
 FROM eclipse-temurin:21-jdk-alpine AS builder
 
 # Set working directory

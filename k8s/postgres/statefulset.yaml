@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
-  namespace: pulsecare
+  namespace: voxcare
   labels:
     app: postgres
     component: database
@@ -26,7 +26,7 @@ spec:
           name: postgres
         env:
         - name: POSTGRES_DB
-          value: pulsecare
+          value: voxcare
         - name: POSTGRES_USER
           valueFrom:
             secretKeyRef:
@@ -56,7 +56,7 @@ spec:
             command:
             - pg_isready
             - -U
-            - pulsecare
+            - voxcare
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
@@ -64,7 +64,7 @@ spec:
             command:
             - pg_isready
             - -U
-            - pulsecare
+            - voxcare
           initialDelaySeconds: 5
           periodSeconds: 5
       volumes:

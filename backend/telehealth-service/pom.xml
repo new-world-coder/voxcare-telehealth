@@ -12,11 +12,11 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.pulsecare</groupId>
+    <groupId>com.voxcare</groupId>
     <artifactId>telehealth-service</artifactId>
     <version>1.0.0</version>
-    <name>PulseCare Telehealth Service</name>
-    <description>Telehealth session management service for PulseCare platform</description>
+    <name>VoxCare Telehealth Service</name>
+    <description>Telehealth session management service for VoxCare platform</description>
 
     <properties>
         <java.version>21</java.version>

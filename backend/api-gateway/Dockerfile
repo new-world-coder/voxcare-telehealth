@@ -1,4 +1,4 @@
-# Multi-stage build for PulseCare API Gateway
+# Multi-stage build for VoxCare API Gateway
 FROM eclipse-temurin:21-jdk-alpine AS builder
 
 # Set working directory

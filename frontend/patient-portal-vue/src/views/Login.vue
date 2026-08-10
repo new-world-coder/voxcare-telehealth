@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="login-card">
       <div class="login-header">
-        <h2>Welcome to PulseCare</h2>
+        <h2>Welcome to VoxCare</h2>
         <p>Sign in to your account</p>
       </div>
       

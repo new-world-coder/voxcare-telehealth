@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# PulseCare GitHub Repository Initialization Script
+# VoxCare GitHub Repository Initialization Script
 # This script creates a new GitHub repository and pushes the initial code
 
 set -e
 
-echo "🚀 Initializing PulseCare GitHub Repository..."
+echo "🚀 Initializing VoxCare GitHub Repository..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -15,7 +15,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-REPO_NAME="pulsecare-telehealth"
+REPO_NAME="voxcare-telehealth"
 REPO_DESCRIPTION="Production-grade, horizontally scalable telehealth platform built with Spring Boot microservices, React/Vue frontends, and Kubernetes deployment"
 REPO_TOPICS="spring-boot,microservices,react,vue,kubernetes,gke,healthcare,telehealth,java,spring-cloud,docker,postgresql,mongodb"
 
@@ -123,7 +123,7 @@ setup_git() {
     
     # Create initial commit
     if ! git diff --cached --quiet; then
-        git commit -m "Initial commit: PulseCare Telehealth Platform
+        git commit -m "Initial commit: VoxCare Telehealth Platform
 
 🚀 Production-grade telehealth platform with:
 - Spring Boot 3 microservices architecture
@@ -302,14 +302,14 @@ EOF
 
     # Create CONTRIBUTING.md
     cat > CONTRIBUTING.md << 'EOF'
-# Contributing to PulseCare
+# Contributing to VoxCare
 
-Thank you for your interest in contributing to PulseCare Telehealth Platform!
+Thank you for your interest in contributing to VoxCare Telehealth Platform!
 
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/your-username/pulsecare-telehealth.git`
+2. Clone your fork: `git clone https://github.com/your-username/voxcare-telehealth.git`
 3. Create a feature branch: `git checkout -b feature/amazing-feature`
 4. Make your changes
 5. Test your changes: `make test`
@@ -329,7 +329,7 @@ Thank you for your interest in contributing to PulseCare Telehealth Platform!
 ```bash
 # Clone and setup
 git clone <your-fork-url>
-cd pulsecare-telehealth
+cd voxcare-telehealth
 make init
 
 # Start services
@@ -382,7 +382,7 @@ EOF
 
 # Main function
 main() {
-    log "🚀 Starting PulseCare GitHub Repository Setup"
+    log "🚀 Starting VoxCare GitHub Repository Setup"
     
     # Check GitHub CLI
     check_github_cli
