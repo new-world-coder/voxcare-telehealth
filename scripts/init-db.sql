@@ -1,12 +1,12 @@
--- PulseCare Database Initialization Script
+-- VoxCare Database Initialization Script
 -- This script creates the database schema and initial data
 
 -- Create database if it doesn't exist
 -- Note: This needs to be run as a superuser or the database must exist
--- CREATE DATABASE pulsecare;
+-- CREATE DATABASE voxcare;
 
--- Connect to the pulsecare database
-\c pulsecare;
+-- Connect to the voxcare database
+\c voxcare;
 
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
@@ -173,8 +173,8 @@ CREATE TRIGGER update_appointments_updated_at BEFORE UPDATE ON appointments FOR 
 CREATE TRIGGER update_voice_calls_updated_at BEFORE UPDATE ON voice_calls FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Grant permissions
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO pulsecare;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO pulsecare;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO voxcare;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO voxcare;
 
 -- Display created tables
 \dt

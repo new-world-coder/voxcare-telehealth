@@ -1,7 +1,7 @@
 {
-  "name": "pulsecare-staff-portal",
+  "name": "voxcare-staff-portal",
   "version": "1.0.0",
-  "description": "Staff Portal for PulseCare Telehealth Platform",
+  "description": "Staff Portal for VoxCare Telehealth Platform",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.4",

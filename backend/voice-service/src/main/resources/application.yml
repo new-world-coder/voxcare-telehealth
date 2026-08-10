@@ -2,9 +2,9 @@ spring:
   application:
     name: voice-service
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:pulsecare}
-    username: ${POSTGRES_USER:pulsecare}
-    password: ${POSTGRES_PASSWORD:pulsecare123}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:voxcare}
+    username: ${POSTGRES_USER:voxcare}
+    password: ${POSTGRES_PASSWORD:voxcare123}
   jpa:
     hibernate:
       ddl-auto: update
@@ -32,7 +32,7 @@ management:
     health:
       show-details: always
 
-pulsecare:
+voxcare:
   voice:
     provider: ${VOICE_PROVIDER:mock}
     dial-api-key: ${DIAL_API_KEY:}
@@ -42,9 +42,9 @@ pulsecare:
     max-retries: ${VOICE_MAX_RETRIES:3}
     retry-delay-minutes: ${VOICE_RETRY_DELAY_MINUTES:30}
     sms-fallback-enabled: ${VOICE_SMS_FALLBACK_ENABLED:true}
-    default-clinic-name: ${VOICE_DEFAULT_CLINIC_NAME:PulseCare}
+    default-clinic-name: ${VOICE_DEFAULT_CLINIC_NAME:VoxCare}
     patient-service-base-url: ${PATIENT_SERVICE_BASE_URL:http://localhost:8082}
 
 logging:
   level:
-    com.pulsecare: DEBUG
+    com.voxcare: DEBUG

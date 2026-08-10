@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# PulseCare Local Data Seeding Script
+# VoxCare Local Data Seeding Script
 # This script populates the system with demo data via API calls
 
 set -e
 
-echo "🌱 Seeding PulseCare with demo data..."
+echo "🌱 Seeding VoxCare with demo data..."
 
 # Colors for output
 RED='\033[0;31m'

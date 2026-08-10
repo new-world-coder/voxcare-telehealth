@@ -1,8 +1,8 @@
-# GetDial Voice AI Integration Strategy (PulseCare)
+# GetDial Voice AI Integration Strategy (VoxCare)
 
 **Status:** Ready to implement  
 **Derived from:** [EstateCraft Dial integration](https://github.com/new-world-coder/estatecraft) (`docs/DIAL_INTEGRATION.md`, `DialVoiceProvider`, provider factory, webhooks)  
-**Target product flow:** Voice AI books / confirms / reminds telehealth appointments in PulseCare
+**Target product flow:** Voice AI books / confirms / reminds telehealth appointments in VoxCare
 
 ---
 
@@ -10,7 +10,7 @@
 
 | Goal | Description |
 |------|-------------|
-| Outbound booking calls | Dial AI calls a patient, offers slots, books via PulseCare APIs |
+| Outbound booking calls | Dial AI calls a patient, offers slots, books via VoxCare APIs |
 | Inbound (phase 2) | Patient calls clinic number; Dial agent books/reschedules |
 | Reminders + SMS fallback | Same Dial number for voice reminder + SMS if no answer |
 | Provider isolation | No Dial SDK leaks outside a provider adapter (EstateCraft pattern) |
@@ -23,7 +23,7 @@ Non-goals for v1: full RCM, multi-tenant Dial credentials, human call-center sof
 
 EstateCraft already solved the vendor boundary. Reuse the **pattern**, not the Node runtime.
 
-| EstateCraft artifact | PulseCare equivalent |
+| EstateCraft artifact | VoxCare equivalent |
 |----------------------|----------------------|
 | `IVoiceProvider` | `VoiceProvider` (Java interface) |
 | `DialVoiceProvider` | `DialVoiceProvider` calling `https://api.getdial.ai` |
@@ -44,7 +44,7 @@ Content-Type: application/json
 {
   "to": "+15551234567",
   "fromNumberId": "{DIAL_FROM_NUMBER_ID}",
-  "outboundInstruction": "You are PulseCare's scheduling assistant..."
+  "outboundInstruction": "You are VoxCare's scheduling assistant..."
 }
 ```
 
@@ -65,7 +65,7 @@ Webhook URL to register in Dial dashboard: `https://{gateway}/api/voice/webhooks
 │ Dial (GetDial)   │──webhook─────┘                         │
 │ AI voice + SMS   │◄── REST /v1/calls ─────────────────────┘
 └────────┬─────────┘
-         │ (during / after call, PulseCare tools)
+         │ (during / after call, VoxCare tools)
          ▼
 ┌────────────────────────────────────────────────────────────┐
 │ appointment-service  │ patient-service │ provider-service  │
@@ -103,7 +103,7 @@ Phases 0–1 in §7 can ship with mock provider while these APIs are completed.
 ### Outbound instruction template (example)
 
 ```text
-You are PulseCare's appointment scheduling assistant for {{clinicName}}.
+You are VoxCare's appointment scheduling assistant for {{clinicName}}.
 Patient name: {{patientName}}.
 Offer available slots for {{specialty}} with these options:
 {{slotList}}
@@ -239,7 +239,7 @@ Never commit real Dial keys. Local default remains `mock`.
 ## 10. Security & Compliance Notes
 
 - Treat transcripts as **PHI-adjacent**; encrypt at rest when moving beyond demo.
-- Mask phone numbers in application logs (existing PulseCare PII masking pattern).
+- Mask phone numbers in application logs (existing VoxCare PII masking pattern).
 - Do not put diagnosis text into Dial instructions.
 - Webhook endpoint must be authenticated or signature-verified in production.
 - Document Dial as a BA under HIPAA if used with real PHI (legal/ops, outside code).

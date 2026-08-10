@@ -2,7 +2,7 @@
 
 Prioritized work after the GetDial strategy scaffold. Details: [`ASSESSMENT.md`](./ASSESSMENT.md), [`GETDIAL_INTEGRATION_STRATEGY.md`](./GETDIAL_INTEGRATION_STRATEGY.md).
 
-**Rename:** pick a name in [`RENAME_PROPOSAL.md`](./RENAME_PROPOSAL.md) before we rebrand the repo.
+**Rename:** completed to **VoxCare** — see [`RENAME_PROPOSAL.md`](./RENAME_PROPOSAL.md). GitHub repo rename to `voxcare-telehealth` may still need owner action (API rename returned 403).
 
 ## P0 — Unblock dialer booking
 

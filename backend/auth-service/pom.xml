@@ -13,7 +13,7 @@
 
     <artifactId>auth-service</artifactId>
     <name>Auth Service</name>
-    <description>Authentication and Authorization Service for PulseCare Platform</description>
+    <description>Authentication and Authorization Service for VoxCare Platform</description>
     
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -136,7 +136,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.pulsecare.auth.AuthServiceApplication</mainClass>
+                    <mainClass>com.voxcare.auth.AuthServiceApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>

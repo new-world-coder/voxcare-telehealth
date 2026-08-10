@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mongo
-  namespace: pulsecare
+  namespace: voxcare
   labels:
     app: mongo
     component: database
@@ -36,7 +36,7 @@ spec:
               name: mongo-secret
               key: password
         - name: MONGO_INITDB_DATABASE
-          value: pulsecare
+          value: voxcare
         volumeMounts:
         - name: mongo-data
           mountPath: /data/db

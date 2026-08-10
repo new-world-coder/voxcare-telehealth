@@ -12,10 +12,10 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.pulsecare</groupId>
+    <groupId>com.voxcare</groupId>
     <artifactId>voice-service</artifactId>
     <version>1.0.0</version>
-    <name>PulseCare Voice Service</name>
+    <name>VoxCare Voice Service</name>
     <description>GetDial / voice AI integration for appointment booking and reminders</description>
 
     <properties>

@@ -1,7 +1,7 @@
 {
-  "name": "pulsecare-patient-portal",
+  "name": "voxcare-patient-portal",
   "version": "1.0.0",
-  "description": "Patient Portal for PulseCare Telehealth Platform",
+  "description": "Patient Portal for VoxCare Telehealth Platform",
   "private": true,
   "scripts": {
     "dev": "vite",

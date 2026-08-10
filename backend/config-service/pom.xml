@@ -13,7 +13,7 @@
 
     <artifactId>config-service</artifactId>
     <name>Config Service</name>
-    <description>Spring Cloud Config Server for PulseCare Platform</description>
+    <description>Spring Cloud Config Server for VoxCare Platform</description>
     
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -87,7 +87,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.pulsecare.config.ConfigServiceApplication</mainClass>
+                    <mainClass>com.voxcare.config.ConfigServiceApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>

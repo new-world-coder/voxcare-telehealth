@@ -152,7 +152,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>PulseCare Staff Dashboard</h1>
+        <h1>VoxCare Staff Dashboard</h1>
         <div className="header-actions">
           <button className="btn btn-primary" type="button" onClick={() => openCallModal('BOOKING')}>
             AI Call to Book

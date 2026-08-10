@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# PulseCare Load Testing Script for HPA Scaling
+# VoxCare Load Testing Script for HPA Scaling
 # This script simulates traffic to trigger horizontal pod autoscaling
 
 set -e
 
-echo "📊 Starting PulseCare Load Testing for HPA Scaling..."
+echo "📊 Starting VoxCare Load Testing for HPA Scaling..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -100,14 +100,14 @@ monitor_hpa() {
     log_info "Monitoring HPA status..."
     
     # Get current HPA status
-    kubectl get hpa appointment-service-hpa -n pulsecare || true
+    kubectl get hpa appointment-service-hpa -n voxcare || true
     
     # Get current pod count
-    local current_pods=$(kubectl get pods -n pulsecare -l app=appointment-service --no-headers | wc -l)
+    local current_pods=$(kubectl get pods -n voxcare -l app=appointment-service --no-headers | wc -l)
     log_info "Current appointment-service pods: $current_pods"
     
     # Get HPA metrics
-    kubectl top pods -n pulsecare -l app=appointment-service || true
+    kubectl top pods -n voxcare -l app=appointment-service || true
 }
 
 # Run k6 load test
@@ -116,7 +116,7 @@ run_k6_test() {
     
     log "Running k6 load test..."
     
-    cat > /tmp/pulsecare-load-test.js << EOF
+    cat > /tmp/voxcare-load-test.js << EOF
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Rate } from 'k6/metrics';
@@ -159,7 +159,7 @@ export default function() {
 }
 EOF
 
-    k6 run /tmp/pulsecare-load-test.js
+    k6 run /tmp/voxcare-load-test.js
 }
 
 # Run curl-based load test
@@ -210,7 +210,7 @@ run_curl_test() {
 
 # Main load testing function
 main() {
-    log "🚀 Starting PulseCare Load Testing"
+    log "🚀 Starting VoxCare Load Testing"
     log "Base URL: ${BASE_URL}"
     log "Duration: ${DURATION} seconds"
     log "Rate: ${RATE} requests/second"
@@ -242,9 +242,9 @@ main() {
     
     # Show scaling results
     log "🎯 Load testing completed!"
-    log "Check HPA scaling with: kubectl get hpa -n pulsecare"
-    log "Monitor pods with: kubectl get pods -n pulsecare -l app=appointment-service"
-    log "View HPA metrics with: kubectl top pods -n pulsecare"
+    log "Check HPA scaling with: kubectl get hpa -n voxcare"
+    log "Monitor pods with: kubectl get pods -n voxcare -l app=appointment-service"
+    log "View HPA metrics with: kubectl top pods -n voxcare"
 }
 
 # Run main function

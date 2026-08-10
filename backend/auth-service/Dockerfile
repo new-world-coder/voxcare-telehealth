@@ -1,4 +1,4 @@
-# Multi-stage build for PulseCare Auth Service
+# Multi-stage build for VoxCare Auth Service
 FROM eclipse-temurin:21-jdk-alpine AS builder
 
 # Set working directory

@@ -1,4 +1,4 @@
-# PulseCare Security Configuration
+# VoxCare Security Configuration
 # HIPAA, PCI, HL7, GDPR, and OWASP Compliance Rules
 
 security:
@@ -185,9 +185,9 @@ security:
   # CORS Configuration
   cors:
     allowed_origins:
-      - "https://pulsecare.com"
-      - "https://patient.pulsecare.com"
-      - "https://staff.pulsecare.com"
+      - "https://voxcare.com"
+      - "https://patient.voxcare.com"
+      - "https://staff.voxcare.com"
     allowed_methods:
       - "GET"
       - "POST"

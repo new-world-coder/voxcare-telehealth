@@ -1,7 +1,7 @@
-# PulseCare Telehealth — Project Assessment
+# VoxCare Telehealth — Project Assessment
 
 **Date:** August 2026  
-**Repo:** [new-world-coder/pulsecare-telehealth](https://github.com/new-world-coder/pulsecare-telehealth)  
+**Repo:** [new-world-coder/voxcare-telehealth](https://github.com/new-world-coder/voxcare-telehealth)  
 **Purpose:** Answer three product questions before feature expansion (RCM share, multi-tenant SaaS readiness, dialer fit).
 
 ---
@@ -14,7 +14,7 @@
 | Is it multi-tenant SaaS today? | **No.** Single-tenant deployment with role-based access only. |
 | Can a voice AI dialer plug into appointment booking? | **Yes.** Appointment REST APIs exist; voice/SMS and some supporting services need to be built. |
 
-**What PulseCare is today:** a telehealth + appointment scheduling platform (Spring Boot microservices, React staff portal, Vue patient portal, Jitsi sessions).
+**What VoxCare is today:** a telehealth + appointment scheduling platform (Spring Boot microservices, React staff portal, Vue patient portal, Jitsi sessions).
 
 ---
 
@@ -22,7 +22,7 @@
 
 ### Verdict: not an RCM product (~0–2%)
 
-PulseCare is a **clinical / scheduling / telehealth** system. There are no billing, claims, insurance eligibility, coding, remittance, denial, AR, or payment-capture modules.
+VoxCare is a **clinical / scheduling / telehealth** system. There are no billing, claims, insurance eligibility, coding, remittance, denial, AR, or payment-capture modules.
 
 ### Approximate domain mix (backend business code)
 
@@ -56,7 +56,7 @@ If RCM is a future goal, treat it as a **new product surface** (claims, eligibil
 |-------|---------|
 | `tenant` / `org_id` / clinic isolation in models | Not present |
 | Auth model | `User` = email + password + role (`PATIENT` / `PROVIDER` / `ADMIN`) |
-| Database | One `pulsecare` DB; no tenant column |
+| Database | One `voxcare` DB; no tenant column |
 | Routing | Single host / single deployment |
 | Config | Global env (`env.example`) |
 
@@ -71,7 +71,7 @@ To become multi-tenant SaaS, add at minimum:
 3. Per-tenant config (Dial keys, Jitsi, notification branding)  
 4. Provisioning / onboarding API  
 
-See also EstateCraft’s SaaS notes for a shared-DB tenancy pattern; PulseCare already has stronger K8s/Docker packaging than EstateCraft, so tenancy is the main gap—not deployability.
+See also EstateCraft’s SaaS notes for a shared-DB tenancy pattern; VoxCare already has stronger K8s/Docker packaging than EstateCraft, so tenancy is the main gap—not deployability.
 
 ---
 
@@ -118,4 +118,4 @@ A GetDial (or similar) voice AI agent can sit in front of booking if we:
 
 ## Summary
 
-PulseCare is a **telehealth scheduler**, not RCM, and not multi-tenant SaaS yet. Appointment APIs are a viable hook for GetDial voice AI. Proceed with the GetDial integration strategy and complete the patient/provider/availability gaps before production dialer traffic.
+VoxCare is a **telehealth scheduler**, not RCM, and not multi-tenant SaaS yet. Appointment APIs are a viable hook for GetDial voice AI. Proceed with the GetDial integration strategy and complete the patient/provider/availability gaps before production dialer traffic.

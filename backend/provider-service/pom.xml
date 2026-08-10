@@ -13,7 +13,7 @@
 
     <artifactId>provider-service</artifactId>
     <name>Provider Service</name>
-    <description>Healthcare Provider Management Service for PulseCare Platform</description>
+    <description>Healthcare Provider Management Service for VoxCare Platform</description>
     
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -84,7 +84,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.pulsecare.provider.ProviderServiceApplication</mainClass>
+                    <mainClass>com.voxcare.provider.ProviderServiceApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>

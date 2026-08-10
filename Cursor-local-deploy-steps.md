@@ -36,8 +36,8 @@ docker-compose up -d grafana
 ### 5. Check Status
 ```bash
 docker-compose ps
-docker logs pulsecare-discovery
-docker logs pulsecare-config
+docker logs voxcare-discovery
+docker logs voxcare-config
 ```
 
 ### 6. Test the Application

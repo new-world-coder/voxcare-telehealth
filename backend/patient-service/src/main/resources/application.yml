@@ -2,9 +2,9 @@ spring:
   application:
     name: patient-service
   datasource:
-    url: jdbc:postgresql://postgres:5432/pulsecare
-    username: pulsecare
-    password: pulsecare123
+    url: jdbc:postgresql://postgres:5432/voxcare
+    username: voxcare
+    password: voxcare123
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -35,4 +35,4 @@ management:
 
 logging:
   level:
-    com.pulsecare: DEBUG
+    com.voxcare: DEBUG

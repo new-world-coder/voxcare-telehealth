@@ -72,5 +72,5 @@ management:
 
 logging:
   level:
-    com.pulsecare: DEBUG
+    com.voxcare: DEBUG
     org.springframework.cloud.gateway: DEBUG

@@ -13,7 +13,7 @@
 
     <artifactId>patient-service</artifactId>
     <name>Patient Service</name>
-    <description>Patient Management Service for PulseCare Platform</description>
+    <description>Patient Management Service for VoxCare Platform</description>
     
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -84,7 +84,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.pulsecare.patient.PatientServiceApplication</mainClass>
+                    <mainClass>com.voxcare.patient.PatientServiceApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>

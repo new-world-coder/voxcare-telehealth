@@ -1,28 +1,23 @@
-# Proposed Project Rename (needs your confirmation)
+# Project Rename — VoxCare
 
-**Do not rename until you reply with a choice.** Implementation of the GetDial plan continues under `PulseCare` / `pulsecare-telehealth` until then.
+**Status:** Confirmed and applied (August 2026)
 
-## Recommendation
+| Item | Value |
+|------|--------|
+| Product name | **VoxCare** |
+| Former name | PulseCare |
+| Java package | `com.voxcare` |
+| Default DB / docker network | `voxcare` |
+| Intended GitHub repo | `voxcare-telehealth` |
 
-**Primary pick: `VoxCare`**  
-Short, brandable, signals **voice + care**, fits telehealth + GetDial booking without sounding like a billing/RCM product.
+## Why VoxCare
 
-Repo would become `voxcare-telehealth` (or just `voxcare`). Java base package `com.voxcare`.
+Short, brandable signal for **voice + care**, aligned with GetDial AI booking without implying RCM/billing.
 
-## Alternatives
+## Applied changes
 
-| Name | Why it works | Caveat |
-|------|----------------|--------|
-| **VoxCare** ★ | Voice-first, modern SaaS, easy to say | “Vox” is used by some other products |
-| **CareLine** | Phone-line + care; clear for dialer scheduling | Slightly generic |
-| **PulseLine** | Keeps “Pulse” equity, adds dialer signal | Closer to current name |
-| **Resona Health** | Distinctive (resonance / voice) | Longer; may need trademark check |
-| **HelixCare** | Clinical/modern without voice cue | Less dialer-specific |
+- Branding strings: PulseCare → VoxCare, pulsecare → voxcare  
+- Java packages: `com.pulsecare` → `com.voxcare`  
+- Compose, env, k8s, DB, portals, docs updated  
 
-## What rename would touch (after you confirm)
-
-- GitHub repo name (`gh` rename / settings)
-- Local folder branding: README, `docker-compose`, k8s namespace, DB name, package `com.pulsecare` → new package
-- Frontend titles, env prefixes, Eureka service names
-
-Reply with one of: `VoxCare`, `CareLine`, `PulseLine`, `Resona Health`, `HelixCare`, or another name you prefer.
+If the GitHub repository rename is still pending in settings, rename `pulsecare-telehealth` → `voxcare-telehealth` and update remotes accordingly.

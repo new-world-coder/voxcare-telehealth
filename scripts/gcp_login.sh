@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# PulseCare GCP Login and Setup Script
+# VoxCare GCP Login and Setup Script
 # This script authenticates with Google Cloud and sets up the project
 
 set -e
 
-echo "☁️  Setting up Google Cloud Platform for PulseCare..."
+echo "☁️  Setting up Google Cloud Platform for VoxCare..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -189,7 +189,7 @@ configure_docker() {
 # Create service account for CI/CD
 create_service_account() {
     local project_id=$(gcloud config get-value project)
-    local sa_name="pulsecare-ci-cd"
+    local sa_name="voxcare-ci-cd"
     local sa_email="$sa_name@$project_id.iam.gserviceaccount.com"
     
     log "Creating service account for CI/CD: $sa_name"
@@ -202,8 +202,8 @@ create_service_account() {
     
     # Create service account
     gcloud iam service-accounts create "$sa_name" \
-        --display-name="PulseCare CI/CD Service Account" \
-        --description="Service account for PulseCare CI/CD pipeline"
+        --display-name="VoxCare CI/CD Service Account" \
+        --description="Service account for VoxCare CI/CD pipeline"
     
     if [ $? -eq 0 ]; then
         log_info "Service account created successfully"
@@ -240,7 +240,7 @@ create_service_account() {
     # Create and download key
     log_info "Creating service account key..."
     
-    local key_file="pulsecare-ci-cd-key.json"
+    local key_file="voxcare-ci-cd-key.json"
     gcloud iam service-accounts keys create "$key_file" \
         --iam-account="$sa_email"
     
@@ -291,7 +291,7 @@ show_config() {
 
 # Main function
 main() {
-    log "☁️  Starting Google Cloud Platform Setup for PulseCare"
+    log "☁️  Starting Google Cloud Platform Setup for VoxCare"
     
     # Check dependencies
     check_gcloud
@@ -329,11 +329,11 @@ main() {
     log "📋 Next steps:"
     log "1. Add the service account key to GitHub Secrets as GCP_SA_KEY"
     log "2. Set GCP_PROJECT_ID in GitHub Secrets: $(gcloud config get-value project)"
-    log "3. Set GKE_CLUSTER in GitHub Secrets: pulsecare-cluster"
+    log "3. Set GKE_CLUSTER in GitHub Secrets: voxcare-cluster"
     log "4. Set GKE_ZONE in GitHub Secrets: $(gcloud config get-value compute/zone)"
     log "5. Run: ./scripts/gke_deploy.sh to deploy to GKE"
     log ""
-    log "🔑 Service account key file: pulsecare-ci-cd-key.json"
+    log "🔑 Service account key file: voxcare-ci-cd-key.json"
     log "⚠️  Keep this file secure and do not commit it to version control"
 }
 

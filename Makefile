@@ -2,7 +2,7 @@
 
 # Default target
 help:
-	@echo "PulseCare Telehealth Scheduler - Available Commands:"
+	@echo "VoxCare Telehealth Scheduler - Available Commands:"
 	@echo ""
 	@echo "Setup:"
 	@echo "  init        - Initialize project (Maven wrapper, Node modules, pre-commit)"
@@ -31,7 +31,7 @@ help:
 
 # Initialize project
 init:
-	@echo "🚀 Initializing PulseCare project..."
+	@echo "🚀 Initializing VoxCare project..."
 	@if [ ! -f "backend/pom.xml" ]; then echo "❌ Backend not found. Please ensure you're in the correct directory."; exit 1; fi
 	
 	# Install Maven wrapper if not present
@@ -81,7 +81,7 @@ build-frontend:
 
 # Start all services
 up:
-	@echo "🚀 Starting PulseCare services..."
+	@echo "🚀 Starting VoxCare services..."
 	@docker-compose up -d
 	@echo "⏳ Waiting for services to be ready..."
 	@./scripts/wait-for-services.sh
@@ -96,7 +96,7 @@ up:
 
 # Stop all services
 down:
-	@echo "🛑 Stopping PulseCare services..."
+	@echo "🛑 Stopping VoxCare services..."
 	@docker-compose down
 	@echo "✅ All services stopped!"
 
@@ -186,7 +186,7 @@ health:
 # Database status
 db-status:
 	@echo "🗄️  Checking database status..."
-	@docker-compose exec postgres pg_isready -U pulsecare || echo "❌ PostgreSQL not ready"
+	@docker-compose exec postgres pg_isready -U voxcare || echo "❌ PostgreSQL not ready"
 	@docker-compose exec mongo mongosh --eval "db.adminCommand('ping')" --quiet || echo "❌ MongoDB not ready"
 
 # Service status

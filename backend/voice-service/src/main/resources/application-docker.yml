@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/pulsecare
-    username: pulsecare
-    password: pulsecare123
+    url: jdbc:postgresql://postgres:5432/voxcare
+    username: voxcare
+    password: voxcare123
 
 eureka:
   client:
@@ -11,6 +11,6 @@ eureka:
   instance:
     hostname: voice-service
 
-pulsecare:
+voxcare:
   voice:
     patient-service-base-url: http://patient-service:8082

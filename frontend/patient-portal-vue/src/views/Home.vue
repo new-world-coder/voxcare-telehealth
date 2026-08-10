@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <div class="hero">
-      <h1>Welcome to PulseCare</h1>
+      <h1>Welcome to VoxCare</h1>
       <p>Your trusted telehealth platform for convenient healthcare</p>
       <div class="hero-buttons">
         <router-link to="/appointments" class="btn btn-primary">Book Appointment</router-link>

@@ -13,7 +13,7 @@
 
     <artifactId>discovery-service</artifactId>
     <name>Discovery Service</name>
-    <description>Eureka Service Discovery for PulseCare Platform</description>
+    <description>Eureka Service Discovery for VoxCare Platform</description>
     
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -79,7 +79,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.pulsecare.discovery.DiscoveryServiceApplication</mainClass>
+                    <mainClass>com.voxcare.discovery.DiscoveryServiceApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>

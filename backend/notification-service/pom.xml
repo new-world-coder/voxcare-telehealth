@@ -12,11 +12,11 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.pulsecare</groupId>
+    <groupId>com.voxcare</groupId>
     <artifactId>notification-service</artifactId>
     <version>1.0.0</version>
-    <name>PulseCare Notification Service</name>
-    <description>Notification service for PulseCare telehealth platform</description>
+    <name>VoxCare Notification Service</name>
+    <description>Notification service for VoxCare telehealth platform</description>
 
     <properties>
         <java.version>21</java.version>

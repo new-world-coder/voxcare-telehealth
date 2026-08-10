@@ -1,7 +1,7 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://pulsecare:pulsecare123@mongo:27017/pulsecare?authSource=admin
+      uri: mongodb://voxcare:voxcare123@mongo:27017/voxcare?authSource=admin
   server:
     port: 8085
   application:
@@ -29,5 +29,5 @@ jitsi:
 
 logging:
   level:
-    com.pulsecare.telehealth: DEBUG
+    com.voxcare.telehealth: DEBUG
     org.springframework.web: INFO

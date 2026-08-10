@@ -1,11 +1,11 @@
-# Contributing to PulseCare
+# Contributing to VoxCare
 
-Thank you for your interest in contributing to PulseCare Telehealth Platform!
+Thank you for your interest in contributing to VoxCare Telehealth Platform!
 
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/your-username/pulsecare-telehealth.git`
+2. Clone your fork: `git clone https://github.com/your-username/voxcare-telehealth.git`
 3. Create a feature branch: `git checkout -b feature/amazing-feature`
 4. Make your changes
 5. Test your changes: `make test`
@@ -25,7 +25,7 @@ Thank you for your interest in contributing to PulseCare Telehealth Platform!
 ```bash
 # Clone and setup
 git clone <your-fork-url>
-cd pulsecare-telehealth
+cd voxcare-telehealth
 make init
 
 # Start services
