@@ -198,7 +198,9 @@ Swagger UI available at: `http://localhost:8080/swagger-ui.html`
 ## 🧭 Product Strategy Docs
 
 - [`docs/ASSESSMENT.md`](docs/ASSESSMENT.md) — RCM share, multi-tenant SaaS readiness, dialer fit
-- [`docs/GETDIAL_INTEGRATION_STRATEGY.md`](docs/GETDIAL_INTEGRATION_STRATEGY.md) — plan to integrate GetDial voice AI (from EstateCraft patterns)
+- [`docs/GETDIAL_INTEGRATION_STRATEGY.md`](docs/GETDIAL_INTEGRATION_STRATEGY.md) — integration plan
+- [`docs/DIAL_INTEGRATION.md`](docs/DIAL_INTEGRATION.md) — EstateCraft-compatible Dial setup (same env + API contract)
+- [`docs/FEATURE_BACKLOG.md`](docs/FEATURE_BACKLOG.md) — prioritized next features
 
 ## 🧪 Testing
 
