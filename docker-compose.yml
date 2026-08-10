@@ -317,6 +317,41 @@ services:
     networks:
       - pulsecare-network
 
+  # Voice Service (GetDial / mock voice AI for booking + reminders)
+  voice-service:
+    build:
+      context: ./backend/voice-service
+      dockerfile: Dockerfile
+    container_name: pulsecare-voice
+    ports:
+      - "8087:8087"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8087
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: voice-service
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pulsecare
+      SPRING_DATASOURCE_USERNAME: pulsecare
+      SPRING_DATASOURCE_PASSWORD: pulsecare123
+      VOICE_PROVIDER: ${VOICE_PROVIDER:-mock}
+      DIAL_API_KEY: ${DIAL_API_KEY:-}
+      DIAL_BASE_URL: ${DIAL_BASE_URL:-https://api.getdial.ai}
+      DIAL_FROM_NUMBER_ID: ${DIAL_FROM_NUMBER_ID:-}
+      VOICE_SMS_FALLBACK_ENABLED: ${VOICE_SMS_FALLBACK_ENABLED:-true}
+      VOICE_DEFAULT_CLINIC_NAME: ${VOICE_DEFAULT_CLINIC_NAME:-PulseCare}
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8087/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - pulsecare-network
+
   # API Gateway
   api-gateway:
     build:

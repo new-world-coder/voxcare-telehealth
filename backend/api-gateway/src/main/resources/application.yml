@@ -44,6 +44,12 @@ spring:
             - Path=/api/telehealth/**
           filters:
             - StripPrefix=1
+        - id: voice-service
+          uri: lb://voice-service
+          predicates:
+            - Path=/api/voice/**
+          filters:
+            - StripPrefix=1
 
 server:
   port: 8080

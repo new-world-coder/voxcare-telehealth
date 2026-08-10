@@ -70,6 +70,35 @@ CREATE TABLE IF NOT EXISTS appointments (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Voice AI call records (GetDial integration)
+CREATE TABLE IF NOT EXISTS voice_calls (
+    id BIGSERIAL PRIMARY KEY,
+    external_id VARCHAR(128) UNIQUE,
+    provider VARCHAR(32) NOT NULL DEFAULT 'dial',
+    purpose VARCHAR(32) NOT NULL,
+    patient_id BIGINT,
+    appointment_id BIGINT,
+    provider_id BIGINT,
+    to_number VARCHAR(32) NOT NULL,
+    status VARCHAR(32) NOT NULL,
+    outcome VARCHAR(32),
+    duration_seconds INTEGER,
+    transcript TEXT,
+    retry_count INTEGER NOT NULL DEFAULT 0,
+    outbound_instruction TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ended_at TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS voice_call_events (
+    id BIGSERIAL PRIMARY KEY,
+    voice_call_id BIGINT NOT NULL REFERENCES voice_calls(id) ON DELETE CASCADE,
+    event_type VARCHAR(64) NOT NULL,
+    payload_json TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
@@ -81,6 +110,10 @@ CREATE INDEX IF NOT EXISTS idx_appointments_patient_id ON appointments(patient_i
 CREATE INDEX IF NOT EXISTS idx_appointments_provider_id ON appointments(provider_id);
 CREATE INDEX IF NOT EXISTS idx_appointments_start_time ON appointments(start_time);
 CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
+CREATE INDEX IF NOT EXISTS idx_voice_calls_external_id ON voice_calls(external_id);
+CREATE INDEX IF NOT EXISTS idx_voice_calls_patient_id ON voice_calls(patient_id);
+CREATE INDEX IF NOT EXISTS idx_voice_calls_status ON voice_calls(status);
+CREATE INDEX IF NOT EXISTS idx_voice_call_events_call_id ON voice_call_events(voice_call_id);
 
 -- Create unique constraints
 ALTER TABLE users ADD CONSTRAINT uk_users_email UNIQUE (email);
@@ -133,6 +166,7 @@ CREATE TRIGGER update_patients_updated_at BEFORE UPDATE ON patients FOR EACH ROW
 CREATE TRIGGER update_providers_updated_at BEFORE UPDATE ON providers FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_availability_updated_at BEFORE UPDATE ON availability FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_appointments_updated_at BEFORE UPDATE ON appointments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_voice_calls_updated_at BEFORE UPDATE ON voice_calls FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO pulsecare;

@@ -191,8 +191,14 @@ This repository was generated using AI assistance with the following approach:
 - **Appointment Service**: `/api/appointments/*`
 - **Telehealth Service**: `/api/telehealth/*`
 - **Notification Service**: `/api/notify/*`
+- **Voice Service** (GetDial / mock): `/api/voice/*`
 
 Swagger UI available at: `http://localhost:8080/swagger-ui.html`
+
+## 🧭 Product Strategy Docs
+
+- [`docs/ASSESSMENT.md`](docs/ASSESSMENT.md) — RCM share, multi-tenant SaaS readiness, dialer fit
+- [`docs/GETDIAL_INTEGRATION_STRATEGY.md`](docs/GETDIAL_INTEGRATION_STRATEGY.md) — plan to integrate GetDial voice AI (from EstateCraft patterns)
 
 ## 🧪 Testing
 
