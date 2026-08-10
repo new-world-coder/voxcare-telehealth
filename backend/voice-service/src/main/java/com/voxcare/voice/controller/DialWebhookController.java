@@ -21,7 +21,12 @@ public class DialWebhookController {
     }
 
     @PostMapping("/dial")
-    public ResponseEntity<Map<String, Object>> dialWebhook(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<Map<String, Object>> dialWebhook(
+            @RequestBody Map<String, Object> body,
+            @RequestHeader(value = "X-Dial-Webhook-Secret", required = false) String webhookSecret,
+            @RequestHeader(value = "X-Webhook-Secret", required = false) String altSecret) {
+        String secret = webhookSecret != null ? webhookSecret : altSecret;
+        voiceCallService.verifyWebhookSecret(secret);
         log.info("Dial webhook received type={}", body.getOrDefault("type", body.get("event")));
         voiceCallService.handleDialWebhook(body);
         return ResponseEntity.ok(Map.of("success", true));

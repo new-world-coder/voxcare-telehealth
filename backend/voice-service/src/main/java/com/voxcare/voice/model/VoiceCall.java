@@ -48,6 +48,12 @@ public class VoiceCall {
     @Column(name = "retry_count", nullable = false)
     private Integer retryCount = 0;
 
+    @Column(name = "sms_fallback_sent", nullable = false)
+    private Boolean smsFallbackSent = false;
+
+    @Column(name = "sms_external_id", length = 128)
+    private String smsExternalId;
+
     @Column(name = "outbound_instruction", columnDefinition = "TEXT")
     private String outboundInstruction;
 
@@ -67,6 +73,9 @@ public class VoiceCall {
         updatedAt = now;
         if (retryCount == null) {
             retryCount = 0;
+        }
+        if (smsFallbackSent == null) {
+            smsFallbackSent = false;
         }
     }
 
@@ -177,6 +186,22 @@ public class VoiceCall {
 
     public void setRetryCount(Integer retryCount) {
         this.retryCount = retryCount;
+    }
+
+    public Boolean getSmsFallbackSent() {
+        return smsFallbackSent;
+    }
+
+    public void setSmsFallbackSent(Boolean smsFallbackSent) {
+        this.smsFallbackSent = smsFallbackSent;
+    }
+
+    public String getSmsExternalId() {
+        return smsExternalId;
+    }
+
+    public void setSmsExternalId(String smsExternalId) {
+        this.smsExternalId = smsExternalId;
     }
 
     public String getOutboundInstruction() {

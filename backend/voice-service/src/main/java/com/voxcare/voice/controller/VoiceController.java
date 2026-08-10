@@ -42,8 +42,21 @@ public class VoiceController {
         return voiceCallService.listByPatient(patientId);
     }
 
+    @PostMapping("/calls/{id}/retry")
+    public VoiceCallResponse retryCall(@PathVariable Long id) {
+        return voiceCallService.retryCall(id);
+    }
+
     @GetMapping("/providers/health")
     public Map<String, Object> providerHealth() {
         return voiceCallService.providerHealth();
+    }
+
+    /**
+     * Enqueue REMINDER calls for appointments returned by appointment-service.
+     */
+    @PostMapping("/reminders/enqueue")
+    public Map<String, Object> enqueueReminders() {
+        return voiceCallService.enqueueReminderCalls();
     }
 }

@@ -19,6 +19,9 @@ public class VoiceProperties {
     private String defaultClinicName = "VoxCare";
     /** Base URL for patient-service (used to resolve phone by patientId). */
     private String patientServiceBaseUrl = "http://localhost:8082";
+    private String providerServiceBaseUrl = "http://localhost:8083";
+    private String appointmentServiceBaseUrl = "http://localhost:8084";
+    private String smsFallbackBookingUrl = "http://localhost:3001/appointments";
 
     public String getProvider() {
         return provider;
@@ -98,5 +101,29 @@ public class VoiceProperties {
 
     public void setPatientServiceBaseUrl(String patientServiceBaseUrl) {
         this.patientServiceBaseUrl = patientServiceBaseUrl;
+    }
+
+    public String getProviderServiceBaseUrl() {
+        return providerServiceBaseUrl;
+    }
+
+    public void setProviderServiceBaseUrl(String providerServiceBaseUrl) {
+        this.providerServiceBaseUrl = providerServiceBaseUrl;
+    }
+
+    public String getAppointmentServiceBaseUrl() {
+        return appointmentServiceBaseUrl;
+    }
+
+    public void setAppointmentServiceBaseUrl(String appointmentServiceBaseUrl) {
+        this.appointmentServiceBaseUrl = appointmentServiceBaseUrl;
+    }
+
+    public String getSmsFallbackBookingUrl() {
+        return smsFallbackBookingUrl;
+    }
+
+    public void setSmsFallbackBookingUrl(String smsFallbackBookingUrl) {
+        this.smsFallbackBookingUrl = smsFallbackBookingUrl;
     }
 }

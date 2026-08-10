@@ -88,6 +88,8 @@ CREATE TABLE IF NOT EXISTS voice_calls (
     duration_seconds INTEGER,
     transcript TEXT,
     retry_count INTEGER NOT NULL DEFAULT 0,
+    sms_fallback_sent BOOLEAN NOT NULL DEFAULT FALSE,
+    sms_external_id VARCHAR(128),
     outbound_instruction TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

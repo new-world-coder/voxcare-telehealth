@@ -44,6 +44,9 @@ voxcare:
     sms-fallback-enabled: ${VOICE_SMS_FALLBACK_ENABLED:true}
     default-clinic-name: ${VOICE_DEFAULT_CLINIC_NAME:VoxCare}
     patient-service-base-url: ${PATIENT_SERVICE_BASE_URL:http://localhost:8082}
+    provider-service-base-url: ${PROVIDER_SERVICE_BASE_URL:http://localhost:8083}
+    appointment-service-base-url: ${APPOINTMENT_SERVICE_BASE_URL:http://localhost:8084}
+    sms-fallback-booking-url: ${SMS_FALLBACK_BOOKING_URL:http://localhost:3001/appointments}
 
 logging:
   level:

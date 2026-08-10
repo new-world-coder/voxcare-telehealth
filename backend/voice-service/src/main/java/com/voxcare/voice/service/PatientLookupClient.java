@@ -20,8 +20,12 @@ public class PatientLookupClient {
         this.properties = properties;
     }
 
-    @SuppressWarnings("unchecked")
     public String findPhoneByPatientId(Long patientId) {
+        PatientInfo info = findById(patientId);
+        return info == null ? null : info.phone();
+    }
+
+    public PatientInfo findById(Long patientId) {
         if (patientId == null) {
             return null;
         }
@@ -33,13 +37,21 @@ public class PatientLookupClient {
                     .uri("/patients/{id}", patientId)
                     .retrieve()
                     .body(Map.class);
-            if (body == null || body.get("phone") == null) {
+            if (body == null) {
                 return null;
             }
-            return String.valueOf(body.get("phone"));
+            return new PatientInfo(
+                    patientId,
+                    stringVal(body.get("firstName")),
+                    stringVal(body.get("lastName")),
+                    stringVal(body.get("phone")));
         } catch (RestClientException e) {
             log.warn("Patient lookup failed for id={}: {}", patientId, e.getMessage());
             return null;
         }
+    }
+
+    private static String stringVal(Object value) {
+        return value == null ? null : String.valueOf(value);
     }
 }

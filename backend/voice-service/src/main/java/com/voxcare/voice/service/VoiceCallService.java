@@ -9,6 +9,8 @@ import com.voxcare.voice.provider.CallResult;
 import com.voxcare.voice.provider.CommunicationStatus;
 import com.voxcare.voice.provider.InitiateCallParams;
 import com.voxcare.voice.provider.PhoneNumberInfo;
+import com.voxcare.voice.provider.SendSmsParams;
+import com.voxcare.voice.provider.SmsResult;
 import com.voxcare.voice.provider.VoiceProvider;
 import com.voxcare.voice.repository.VoiceCallRepository;
 import org.slf4j.Logger;
@@ -18,7 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -32,23 +38,38 @@ public class VoiceCallService {
     private final VoiceCallRepository repository;
     private final VoiceProperties properties;
     private final PatientLookupClient patientLookupClient;
+    private final SchedulingContextClient schedulingContextClient;
+    private final OutboundInstructionBuilder instructionBuilder;
 
     public VoiceCallService(
             VoiceProvider voiceProvider,
             VoiceCallRepository repository,
             VoiceProperties properties,
-            PatientLookupClient patientLookupClient) {
+            PatientLookupClient patientLookupClient,
+            SchedulingContextClient schedulingContextClient,
+            OutboundInstructionBuilder instructionBuilder) {
         this.voiceProvider = voiceProvider;
         this.repository = repository;
         this.properties = properties;
         this.patientLookupClient = patientLookupClient;
+        this.schedulingContextClient = schedulingContextClient;
+        this.instructionBuilder = instructionBuilder;
     }
 
     @Transactional
     public VoiceCallResponse initiateCall(InitiateVoiceCallRequest request) {
+        return initiateCall(request, 0);
+    }
+
+    @Transactional
+    public VoiceCallResponse initiateCall(InitiateVoiceCallRequest request, int retryCount) {
+        PatientInfo patient = request.getPatientId() == null
+                ? null
+                : patientLookupClient.findById(request.getPatientId());
+
         String to = request.getTo();
-        if ((to == null || to.isBlank()) && request.getPatientId() != null) {
-            to = patientLookupClient.findPhoneByPatientId(request.getPatientId());
+        if ((to == null || to.isBlank()) && patient != null) {
+            to = patient.phone();
         }
         if (to == null || to.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -57,7 +78,8 @@ public class VoiceCallService {
 
         String instruction = request.getOutboundInstruction();
         if (instruction == null || instruction.isBlank()) {
-            instruction = buildDefaultInstruction(request.getPurpose());
+            List<OpenSlot> slots = schedulingContextClient.findOpenSlots(request.getProviderId());
+            instruction = instructionBuilder.build(request.getPurpose(), patient, slots, null);
         }
 
         CallResult result = voiceProvider.initiateCall(new InitiateCallParams(
@@ -77,11 +99,12 @@ public class VoiceCallService {
         call.setToNumber(to);
         call.setStatus(result.status().name());
         call.setOutboundInstruction(instruction);
-        call.setRetryCount(0);
+        call.setRetryCount(retryCount);
+        call.setSmsFallbackSent(false);
 
         VoiceCall saved = repository.save(call);
-        log.info("Voice call persisted id={} externalId={} provider={}",
-                saved.getId(), saved.getExternalId(), saved.getProvider());
+        log.info("Voice call persisted id={} externalId={} provider={} retry={}",
+                saved.getId(), saved.getExternalId(), saved.getProvider(), retryCount);
         return VoiceCallResponse.from(saved);
     }
 
@@ -104,6 +127,61 @@ public class VoiceCallService {
         return repository.findByPatientIdOrderByCreatedAtDesc(patientId).stream()
                 .map(VoiceCallResponse::from)
                 .toList();
+    }
+
+    /**
+     * Pull appointments needing reminders and enqueue REMINDER voice calls.
+     */
+    @Transactional
+    public Map<String, Object> enqueueReminderCalls() {
+        List<ReminderAppointment> appointments = schedulingContextClient.findAppointmentsNeedingReminders();
+        List<Long> createdCallIds = new ArrayList<>();
+        List<Long> skipped = new ArrayList<>();
+
+        for (ReminderAppointment appointment : appointments) {
+            if (appointment.patientId() == null) {
+                skipped.add(appointment.id());
+                continue;
+            }
+            try {
+                InitiateVoiceCallRequest req = new InitiateVoiceCallRequest();
+                req.setPatientId(appointment.patientId());
+                req.setProviderId(appointment.providerId());
+                req.setAppointmentId(appointment.id());
+                req.setPurpose(VoiceCallPurpose.REMINDER);
+
+                PatientInfo patient = patientLookupClient.findById(appointment.patientId());
+                List<OpenSlot> slots = schedulingContextClient.findOpenSlots(appointment.providerId());
+                req.setOutboundInstruction(instructionBuilder.build(
+                        VoiceCallPurpose.REMINDER,
+                        patient,
+                        slots,
+                        appointment.appointmentDate()));
+
+                VoiceCallResponse created = initiateCall(req, 0);
+                createdCallIds.add(created.getId());
+            } catch (Exception e) {
+                log.warn("Failed to enqueue reminder for appointment {}: {}", appointment.id(), e.getMessage());
+                skipped.add(appointment.id());
+            }
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("candidates", appointments.size());
+        result.put("enqueued", createdCallIds.size());
+        result.put("callIds", createdCallIds);
+        result.put("skippedAppointmentIds", skipped);
+        return result;
+    }
+
+    public void verifyWebhookSecret(String providedSecret) {
+        String expected = properties.getDialWebhookSecret();
+        if (expected == null || expected.isBlank()) {
+            return; // open in local/dev when unset
+        }
+        if (providedSecret == null || providedSecret.isBlank() || !constantTimeEquals(expected, providedSecret)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Dial webhook secret");
+        }
     }
 
     @Transactional
@@ -143,16 +221,70 @@ public class VoiceCallService {
         if (status.equals(CommunicationStatus.COMPLETED.name())) {
             call.setOutcome("CONNECTED");
             call.setEndedAt(LocalDateTime.now());
-        } else if (status.equals(CommunicationStatus.FAILED.name())
-                || status.equals(CommunicationStatus.NO_ANSWER.name())
-                || status.equals(CommunicationStatus.BUSY.name())
-                || status.equals(CommunicationStatus.CANCELLED.name())) {
+            repository.save(call);
+        } else if (isTerminalFailure(status)) {
             call.setOutcome(status);
             call.setEndedAt(LocalDateTime.now());
+            repository.save(call);
+            handleFailedCall(call);
+        } else {
+            repository.save(call);
         }
 
-        repository.save(call);
         log.info("Dial webhook applied externalId={} status={}", externalId, call.getStatus());
+    }
+
+    private void handleFailedCall(VoiceCall call) {
+        int retries = call.getRetryCount() == null ? 0 : call.getRetryCount();
+        if (retries < properties.getMaxRetries()) {
+            log.info(
+                    "Call id={} failed with retries {}/{}; use POST /voice/calls/{}/retry after {} minutes",
+                    call.getId(),
+                    retries,
+                    properties.getMaxRetries(),
+                    call.getId(),
+                    properties.getRetryDelayMinutes());
+        }
+
+        if (properties.isSmsFallbackEnabled() && !Boolean.TRUE.equals(call.getSmsFallbackSent())) {
+            sendSmsFallback(call);
+        }
+    }
+
+    @Transactional
+    public VoiceCallResponse retryCall(Long id) {
+        VoiceCall existing = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voice call not found"));
+        int retries = existing.getRetryCount() == null ? 0 : existing.getRetryCount();
+        if (retries >= properties.getMaxRetries()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Max retries already reached");
+        }
+        InitiateVoiceCallRequest retry = new InitiateVoiceCallRequest();
+        retry.setPatientId(existing.getPatientId());
+        retry.setProviderId(existing.getProviderId());
+        retry.setAppointmentId(existing.getAppointmentId());
+        retry.setPurpose(existing.getPurpose());
+        retry.setTo(existing.getToNumber());
+        retry.setOutboundInstruction(existing.getOutboundInstruction());
+        return initiateCall(retry, retries + 1);
+    }
+
+    private void sendSmsFallback(VoiceCall call) {
+        try {
+            String body = instructionBuilder.smsFallbackBody(call.getPurpose(), properties.getDefaultClinicName())
+                    + " " + properties.getSmsFallbackBookingUrl();
+            SmsResult sms = voiceProvider.sendSms(new SendSmsParams(
+                    call.getToNumber(),
+                    null,
+                    body,
+                    call.getPatientId()));
+            call.setSmsFallbackSent(true);
+            call.setSmsExternalId(sms.externalId() != null ? sms.externalId() : sms.messageId());
+            repository.save(call);
+            log.info("SMS fallback sent for call id={} smsId={}", call.getId(), call.getSmsExternalId());
+        } catch (Exception e) {
+            log.warn("SMS fallback failed for call id={}: {}", call.getId(), e.getMessage());
+        }
     }
 
     public Map<String, Object> providerHealth() {
@@ -163,27 +295,22 @@ public class VoiceCallService {
             log.warn("Provider health listNumbers failed: {}", e.getMessage());
             numbers = List.of();
         }
-        return Map.of(
-                "provider", voiceProvider.getName(),
-                "configuredProvider", properties.getProvider(),
-                "smsFallbackEnabled", properties.isSmsFallbackEnabled(),
-                "numbers", numbers);
+        Map<String, Object> health = new LinkedHashMap<>();
+        health.put("provider", voiceProvider.getName());
+        health.put("configuredProvider", properties.getProvider());
+        health.put("smsFallbackEnabled", properties.isSmsFallbackEnabled());
+        health.put("maxRetries", properties.getMaxRetries());
+        health.put("webhookSecretConfigured",
+                properties.getDialWebhookSecret() != null && !properties.getDialWebhookSecret().isBlank());
+        health.put("numbers", numbers);
+        return health;
     }
 
-    private String buildDefaultInstruction(VoiceCallPurpose purpose) {
-        String clinic = properties.getDefaultClinicName();
-        return switch (purpose) {
-            case BOOKING -> "You are " + clinic
-                    + "'s appointment scheduling assistant. Help the patient book a telehealth visit. "
-                    + "Be concise and HIPAA-aware: do not discuss diagnoses. Confirm a specific date and time.";
-            case REMINDER -> "You are " + clinic
-                    + "'s reminder assistant. Remind the patient of their upcoming telehealth appointment "
-                    + "and offer to reschedule if needed. Do not discuss clinical details.";
-            case RESCHEDULE -> "You are " + clinic
-                    + "'s scheduling assistant. Help the patient reschedule their telehealth appointment.";
-            case FOLLOW_UP -> "You are " + clinic
-                    + "'s follow-up assistant. Confirm the patient completed intake and is ready for their visit.";
-        };
+    private static boolean isTerminalFailure(String status) {
+        return status.equals(CommunicationStatus.FAILED.name())
+                || status.equals(CommunicationStatus.NO_ANSWER.name())
+                || status.equals(CommunicationStatus.BUSY.name())
+                || status.equals(CommunicationStatus.CANCELLED.name());
     }
 
     private static String normalizeStatus(String raw) {
@@ -196,6 +323,12 @@ public class VoiceCallService {
         };
     }
 
+    private static boolean constantTimeEquals(String a, String b) {
+        return MessageDigest.isEqual(
+                a.getBytes(StandardCharsets.UTF_8),
+                b.getBytes(StandardCharsets.UTF_8));
+    }
+
     private static Object firstNonNull(Object... values) {
         for (Object v : values) {
             if (v != null) {
@@ -205,7 +338,6 @@ public class VoiceCallService {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     private static Object nested(Map<String, Object> map, String... path) {
         Object current = map;
         for (String key : path) {

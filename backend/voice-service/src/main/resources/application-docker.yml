@@ -14,3 +14,6 @@ eureka:
 voxcare:
   voice:
     patient-service-base-url: http://patient-service:8082
+    provider-service-base-url: http://provider-service:8083
+    appointment-service-base-url: http://appointment-service:8084
+    sms-fallback-booking-url: ${SMS_FALLBACK_BOOKING_URL:http://localhost:3001/appointments}

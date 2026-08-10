@@ -20,6 +20,7 @@ public class VoiceCallResponse {
     private Integer durationSeconds;
     private String transcript;
     private Integer retryCount;
+    private boolean smsFallbackSent;
     private LocalDateTime createdAt;
     private LocalDateTime endedAt;
 
@@ -38,6 +39,7 @@ public class VoiceCallResponse {
         r.durationSeconds = call.getDurationSeconds();
         r.transcript = call.getTranscript();
         r.retryCount = call.getRetryCount();
+        r.smsFallbackSent = Boolean.TRUE.equals(call.getSmsFallbackSent());
         r.createdAt = call.getCreatedAt();
         r.endedAt = call.getEndedAt();
         return r;
@@ -93,6 +95,10 @@ public class VoiceCallResponse {
 
     public Integer getRetryCount() {
         return retryCount;
+    }
+
+    public boolean isSmsFallbackSent() {
+        return smsFallbackSent;
     }
 
     public LocalDateTime getCreatedAt() {
