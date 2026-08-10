@@ -1,7 +1,6 @@
 package com.pulsecare.voice.dto;
 
 import com.pulsecare.voice.model.VoiceCallPurpose;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class InitiateVoiceCallRequest {
